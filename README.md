@@ -1,6 +1,6 @@
 # CineList 🎬
 
-CineList é um aplicativo de filmes premium, moderno e sofisticado para catalogar, avaliar e favoritar filmes. O aplicativo é composto por um **backend em Node.js (seguindo o padrão MVC)** e um **frontend SPA em ReactJS**, ambos conectados de forma segura ao **Supabase**.
+CineList é um aplicativo de catálogo, avaliação e curadoria de filmes premium, moderno e sofisticado. A aplicação combina uma interface **glassmorphic escura** responsiva e repleta de micro-interações a um **backend em Node.js (padrão MVC)** seguro conectado ao **Supabase**.
 
 ---
 
@@ -29,38 +29,65 @@ CineList/
 ├── frontend/
 │   ├── src/
 │   │   ├── components/   # Elementos reutilizáveis (Estrelas, Cards, Toasts) (V de MVC)
-│   │   ├── pages/        # Telas (Dashboard, Biblioteca, Login/Cadastro) (V de MVC)
-│   │   ├── services/     # Clientes de integração (API Node.js & Auth Supabase)
-│   │   ├── index.css     # Estilização global avançada (CSS customizado)
+│   │   ├── pages/        # Telas (Dashboard, Biblioteca, Login/Cadastro, CineQuiz) (V de MVC)
+│   │   ├── services/     # Clientes de integração (API Node.js & TMDB Service)
+│   │   ├── index.css     # Estilização global avançada (CSS customizado, animações e glows)
 │   │   └── main.jsx
 │   ├── index.html        # Estrutura HTML com SEO otimizado
 │   └── package.json
-├── schema.sql            # Script SQL de tabelas e políticas de segurança
+├── schema.sql            # Script SQL inicial de tabelas e políticas de segurança
+├── migration_v2.sql      # Script SQL de migração para likes e curtidas
+├── migration_v3.sql      # Script SQL de migração para sincronização TMDB e trailers
+├── migration_v4.sql      # Script SQL de migração para suporte a filtros de spoiler
 └── README.md             # Instruções de uso (Este arquivo!)
 ```
 
 ---
 
+## ✨ Funcionalidades Avançadas Implementadas
+
+1. **⏱️ Filtro "Tempo Limite" (Feature 11)**:
+   A Dashboard possui um controle deslizante (*slider*) avançado nas opções de filtragem que permite limitar a busca de filmes no TMDB de acordo com a sua duração em minutos (entre 15 e 240 minutos).
+
+2. **🦎 Interface Dinâmica Camaleão (Feature 12)**:
+   Ao abrir os detalhes de qualquer produção, um algoritmo em Canvas HTML5 analisa o pôster do filme em tempo real, extrai a cor média predominante e a injeta como variáveis dinâmicas CSS (`--chameleon-color` e `--chameleon-color-accent`). O fundo do aplicativo e os botões da modal ganham uma aura brilhante ambientada que muda de acordo com o filme selecionado!
+
+3. **🛡️ Filtro Inteligente Anti-Spoiler (Feature 14)**:
+   Ao escrever uma crítica, os usuários podem marcar a opção *"Este comentário contém spoilers?"*. Na listagem de avaliações do filme, os comentários marcados como spoilers são ocultados sob um card embaçado com aviso. Basta clicar para revelar ou ocultar a crítica novamente.
+
+4. **💡 Modo Cinema (Feature 15)**:
+   Na modal de detalhes do filme, há um interruptor com ícone de lâmpada no topo direito. Ao ser clicado, a tela escurece quase 100%, esmaecendo descrições e comentários adicionais e destacando inteiramente a área do trailer com borda brilhante e sombras neon.
+
+5. **🍿 CineQuiz (Feature 16)**:
+   Um jogo dinâmico de trivia integrado no menu principal que busca filmes populares do TMDB para gerar 5 perguntas aleatórias e personalizadas por partida. Conta com animações dinâmicas de erro (balanço/shake vermelho) e acerto (pulso de luz verde), placar acumulado e medalhas de conquista personalizadas.
+
+6. **📍 CineMap (Feature 20)**:
+   Seção visual integrada à modal que exibe no mapa (OpenStreetMap com tema escuro via filtros CSS) a locação real onde cenas icônicas de produções famosas foram filmadas (ex: as escadarias do Bronx de *Joker* ou a ponte Bir-Hakeim de *Inception*). Produções sem cenas mapeadas contam com *fallback* automático posicionando o mapa no país de origem da produtora do filme.
+
+---
+
 ## 🚀 Como Executar o Projeto Passo a Passo
 
-Como solicitado, **não é utilizado nenhum tipo de Docker**. O projeto roda inteiramente de forma nativa e local.
+O projeto roda de forma nativa e local, sem necessidade de Docker.
 
 ### Passo 1: Configurar o Banco de Dados no Supabase
 
 1. Vá para [supabase.com](https://supabase.com) e crie uma conta gratuita.
-2. Crie um **Novo Projeto** (New Project). Defina um nome (ex: `CineList`), senha do banco de dados e selecione a região mais próxima.
+2. Crie um **Novo Projeto** (New Project). Defina um nome, senha do banco de dados e selecione a região mais próxima.
 3. Assim que o projeto for provisionado, acesse o menu **SQL Editor** no painel lateral esquerdo.
 4. Clique em **New Query** (Nova Consulta).
-5. Abra o arquivo [schema.sql](./schema.sql) localizado no diretório raiz deste projeto, copie todo o seu conteúdo e cole no editor do Supabase.
-6. Clique no botão **Run** (Executar) no canto inferior direito.
-   * *Isso criará as tabelas `movies`, `reviews` e `favorites`, habilitará as políticas de segurança de linha (RLS) e alimentará a base com 5 filmes populares de exemplo.*
+5. Abra o arquivo [schema.sql](./schema.sql) localizado no diretório raiz deste projeto, copie todo o seu conteúdo e cole no editor do Supabase. Clique no botão **Run** (Executar).
+6. Repita o mesmo processo de criar uma **New Query** e rodar as migrações na ordem cronológica de atualização:
+   * **[migration_v2.sql](./migration_v2.sql)** (Criação de curtidas em comentários).
+   * **[migration_v3.sql](./migration_v3.sql)** (Sincronização de campos TMDB extras).
+   * **[migration_v4.sql](./migration_v4.sql)** (Nova coluna `is_spoiler` na tabela `reviews`).
 
 ---
 
 ### Passo 2: Obter as Credenciais do Supabase
 
-No painel do Supabase:
-1. Vá em **Project Settings** (Engrenagem no canto inferior esquerdo) > **API**.
+No painel do seu projeto Supabase:
+1. Vá em **Project Settings** (Ícone de engrenagem no canto inferior esquerdo) > **API**.
 2. Copie os seguintes valores:
    * **Project URL** (ex: `https://xxxxxx.supabase.co`)
    * **anon / public** key (ex: `eyJhbGciOi...`)
@@ -93,7 +120,7 @@ VITE_SUPABASE_ANON_KEY=sua-anon-key-aqui
    ```bash
    cd backend
    ```
-2. Instale as dependências (já inicializadas):
+2. Instale as dependências:
    ```bash
    npm install
    ```
@@ -120,13 +147,3 @@ VITE_SUPABASE_ANON_KEY=sua-anon-key-aqui
    npm run dev
    ```
    * O Vite abrirá a aplicação em `http://localhost:5173`. Acesse no seu navegador para começar a interagir!
-
----
-
-## 🎬 Funcionalidades para Testar
-
-1. **Autenticação**: Crie uma conta na tela inicial (Sign Up) com e-mail e senha e faça o login.
-2. **Catálogo de Filmes**: Na aba principal, pesquise pelos filmes semeados (ex: digite "Inception" ou "Interstellar").
-3. **Favoritar**: Clique no coração flutuante no card do filme ou na página de detalhes. Ele será imediatamente adicionado à aba **Favoritos**. Você pode desfavoritar clicando novamente.
-4. **Avaliação por Estrelas**: Clique em um card de filme para abrir a tela de detalhes. Selecione de 1 a 5 estrelas (passando o mouse para ver a animação de preenchimento) e digite um comentário na caixa de texto. Clique em **Publicar Avaliação**.
-5. **Comunidade**: A média das avaliações do filme será recalculada imediatamente, exibindo a nova nota e listando o seu comentário e o de outros usuários na lateral direita. Você pode excluir seu próprio comentário clicando na lixeira vermelha correspondente.
