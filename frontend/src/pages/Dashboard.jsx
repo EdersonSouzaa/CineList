@@ -180,13 +180,14 @@ export const Dashboard = ({ user, addToast }) => {
     genre: '',
     year: '',
     sortBy: 'popularity.desc',
+    maxRuntime: '',
   });
 
   const searchTimeout               = useRef(null);
   const loadMoreRef                 = useRef(null);
   const isSearching                 = search.trim().length > 0;
   
-  const isFilterActive = filters.genre !== '' || filters.year !== '' || filters.sortBy !== 'popularity.desc';
+  const isFilterActive = filters.genre !== '' || filters.year !== '' || filters.sortBy !== 'popularity.desc' || filters.maxRuntime !== '';
 
   // Carrega favoritos do backend
   const loadFavorites = useCallback(async () => {
@@ -207,7 +208,8 @@ export const Dashboard = ({ user, addToast }) => {
         data = await discoverContent(filters.mediaType, {
           genre: filters.genre,
           year: filters.year,
-          sortBy: filters.sortBy
+          sortBy: filters.sortBy,
+          maxRuntime: filters.maxRuntime
         }, pg);
       } else {
         data = await fetchByTab(activeTab, pg);
@@ -233,6 +235,7 @@ export const Dashboard = ({ user, addToast }) => {
       genre: '',
       year: '',
       sortBy: 'popularity.desc',
+      maxRuntime: '',
     });
     setPage(1);
     setSearch('');
@@ -323,6 +326,7 @@ export const Dashboard = ({ user, addToast }) => {
       genre: '',
       year: '',
       sortBy: 'popularity.desc',
+      maxRuntime: '',
     });
   };
 
@@ -408,6 +412,30 @@ export const Dashboard = ({ user, addToast }) => {
             />
           </div>
 
+          <div className="filter-group slider-group">
+            <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>Duração</span>
+              <span className="slider-value" style={{ color: 'var(--accent)', fontWeight: 600, fontSize: '0.85rem' }}>
+                {filters.maxRuntime ? `${filters.maxRuntime} min` : 'Qualquer'}
+              </span>
+            </label>
+            <div style={{ display: 'flex', alignItems: 'center', height: '36px' }}>
+              <input
+                type="range"
+                min="15"
+                max="240"
+                step="5"
+                value={filters.maxRuntime || '240'}
+                onChange={e => {
+                  const val = e.target.value;
+                  handleFilterChange('maxRuntime', val === '240' ? '' : val);
+                }}
+                className="filter-slider"
+                style={{ width: '100%', cursor: 'pointer', accentColor: 'var(--accent)' }}
+              />
+            </div>
+          </div>
+ 
           <div className="filter-group">
             <label>Ordenar por</label>
             <select

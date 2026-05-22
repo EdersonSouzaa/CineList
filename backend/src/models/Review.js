@@ -54,7 +54,8 @@ export const Review = {
           user_id: reviewData.user_id,
           user_email: reviewData.user_email,
           rating: reviewData.rating,
-          comment: reviewData.comment
+          comment: reviewData.comment,
+          is_spoiler: reviewData.is_spoiler || false
         }
       ])
       .select()

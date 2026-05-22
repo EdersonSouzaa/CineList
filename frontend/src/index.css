@@ -105,8 +105,8 @@ button, input, textarea {
 
 .main-content {
   flex: 1;
-  padding: 100px 2rem 4rem 2rem;
-  max-width: 1400px;
+  padding: 100px 1rem 4rem 1rem;
+  max-width: 1332px;
   margin: 0 auto;
   width: 100%;
 }
@@ -1594,5 +1594,152 @@ button, input, textarea {
     flex-direction: column;
     text-align: center;
   }
+}
+
+/* ==========================================================================
+   FEATURE 12: CHAMELEON UI (CORES DINÂMICAS)
+   ========================================================================== */
+:root[style*="--chameleon-color"] body {
+  background-image: 
+    radial-gradient(at 50% 50%, rgba(var(--chameleon-color), 0.1) 0px, transparent 70%),
+    radial-gradient(at 10% 10%, rgba(var(--chameleon-color-accent), 0.06) 0px, transparent 50%),
+    radial-gradient(at 90% 90%, rgba(6, 182, 212, 0.04) 0px, transparent 50%);
+}
+
+:root[style*="--chameleon-color"] .modal-content {
+  box-shadow: 0 16px 48px rgba(var(--chameleon-color), 0.3),
+              0 0 30px rgba(var(--chameleon-color-accent), 0.15),
+              var(--glass-shadow) !important;
+  border-color: rgba(var(--chameleon-color-accent), 0.25) !important;
+}
+
+:root[style*="--chameleon-color"] .modal-content .tag.accent {
+  background: rgba(var(--chameleon-color-accent), 0.15) !important;
+  border-color: rgba(var(--chameleon-color-accent), 0.3) !important;
+  color: rgb(var(--chameleon-color-accent)) !important;
+}
+
+/* ==========================================================================
+   FEATURE 14: ANTI-SPOILER WARNINGS
+   ========================================================================== */
+.spoiler-warning {
+  transition: var(--transition-bounce) !important;
+}
+
+.spoiler-warning:hover {
+  background: rgba(244, 63, 94, 0.08) !important;
+  border-style: solid !important;
+  box-shadow: 0 0 15px rgba(244, 63, 94, 0.15) !important;
+  transform: scale(1.01) !important;
+}
+
+/* ==========================================================================
+   FEATURE 15: CINEMA MODE (MODO CINEMA)
+   ========================================================================== */
+.modal-overlay.cinema-mode-active {
+  background: rgba(4, 6, 10, 0.98) !important;
+  backdrop-filter: blur(25px) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  transition: var(--transition-smooth) !important;
+}
+
+.modal-content.cinema-mode-active {
+  background: #05070c !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.9) !important;
+  transition: var(--transition-smooth) !important;
+}
+
+.modal-content.cinema-mode-active .movie-reviews-section,
+.modal-content.cinema-mode-active .cinemap-section,
+.modal-content.cinema-mode-active .modal-extra-section .providers-container,
+.modal-content.cinema-mode-active .movie-header-section {
+  opacity: 0.2;
+  transition: opacity 0.4s ease;
+}
+
+.modal-content.cinema-mode-active .movie-reviews-section:hover,
+.modal-content.cinema-mode-active .cinemap-section:hover,
+.modal-content.cinema-mode-active .movie-header-section:hover {
+  opacity: 0.95;
+}
+
+.modal-content.cinema-mode-active .trailer-container {
+  opacity: 1;
+  transform: scale(1.02);
+  transition: var(--transition-bounce);
+}
+
+.modal-content.cinema-mode-active .trailer-wrapper {
+  border: 2px solid var(--accent) !important;
+  box-shadow: 0 0 30px var(--accent-glow) !important;
+}
+
+.btn-cinema-mode.active {
+  box-shadow: 0 0 15px var(--accent-glow) !important;
+  animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 10px rgba(6, 182, 212, 0.4); }
+  50% { box-shadow: 0 0 20px rgba(6, 182, 212, 0.8); }
+  100% { box-shadow: 0 0 10px rgba(6, 182, 212, 0.4); }
+}
+
+/* ==========================================================================
+   FEATURE 20: CINEMAP (FILMING LOCATIONS DARK MAP)
+   ========================================================================== */
+.cinemap-iframe {
+  filter: invert(90%) hue-rotate(180deg) brightness(95%) contrast(90%);
+  transition: var(--transition-smooth);
+}
+
+.cinemap-iframe:hover {
+  filter: invert(90%) hue-rotate(180deg) brightness(105%) contrast(95%);
+}
+
+@media (max-width: 640px) {
+  .cinemap-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+}
+
+/* ==========================================================================
+   FEATURE 16: CINEQUIZ (GAME UI & ANIMATIONS)
+   ========================================================================== */
+.quiz-option-btn {
+  transition: var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.quiz-option-btn.interactive:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 15px var(--accent-glow) !important;
+  transform: translateX(6px) !important;
+}
+
+.quiz-option-btn.correct {
+  animation: pop-success 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.3) !important;
+}
+
+.quiz-option-btn.incorrect {
+  animation: shake 0.4s ease-in-out !important;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3) !important;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+
+@keyframes pop-success {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); }
 }
 

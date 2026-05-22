@@ -5,14 +5,16 @@ export const ReviewForm = ({ onSubmitReview, isSubmitting }) => {
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState('');
+  const [isSpoiler, setIsSpoiler] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (rating === 0) return;
     
-    onSubmitReview({ rating, comment });
+    onSubmitReview({ rating, comment, is_spoiler: isSpoiler });
     setRating(0);
     setComment('');
+    setIsSpoiler(false);
   };
 
   return (
@@ -54,6 +56,19 @@ export const ReviewForm = ({ onSubmitReview, isSubmitting }) => {
           onChange={(e) => setComment(e.target.value)}
           maxLength={1000}
         />
+      </div>
+
+      <div className="comment-input-wrapper checkbox-wrapper" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', margin: '0.8rem 0' }}>
+        <input
+          type="checkbox"
+          id="is-spoiler"
+          checked={isSpoiler}
+          onChange={(e) => setIsSpoiler(e.target.checked)}
+          style={{ width: '16px', height: '16px', accentColor: 'var(--accent)', cursor: 'pointer' }}
+        />
+        <label htmlFor="is-spoiler" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', cursor: 'pointer', userSelect: 'none' }}>
+          Este comentário contém spoilers?
+        </label>
       </div>
 
       <button 

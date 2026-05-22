@@ -124,6 +124,9 @@ export const discoverContent = async (mediaType = 'movie', filters = {}, page = 
   } else {
     params.sort_by = 'popularity.desc';
   }
+  if (filters.maxRuntime) {
+    params['with_runtime.lte'] = filters.maxRuntime;
+  }
 
   const data = await fetchTMDB(`/discover/${mediaType}`, params);
   return data.results.map(item => normalizeItem(item, mediaType));
@@ -184,5 +187,6 @@ export const getDetails = async (tmdbId, mediaType) => {
     status: data.status || null,
     watch_providers: watchProviders,
     trailer_url: trailerUrl,
+    production_countries: data.production_countries || [],
   };
 };

@@ -6,6 +6,7 @@ import Auth from './pages/Auth.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Favorites from './pages/Favorites.jsx';
 import Profile from './pages/Profile.jsx';
+import CineQuiz from './pages/CineQuiz.jsx';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -74,6 +75,8 @@ function App() {
           <Dashboard user={user} addToast={addToast} />
         ) : activeTab === 'favorites' ? (
           <Favorites user={user} addToast={addToast} />
+        ) : activeTab === 'quiz' ? (
+          <CineQuiz user={user} addToast={addToast} />
         ) : (
           <Profile user={user} addToast={addToast} />
         )}

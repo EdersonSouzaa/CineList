@@ -1,6 +1,7 @@
 import React from 'react';
-import { Film, Heart, LogOut, Clapperboard, User } from 'lucide-react';
+import { Film, Heart, LogOut, User, Gamepad2 } from 'lucide-react';
 import { supabase } from '../services/supabase.js';
+import iconeApp from '../assets/app_icone.png';
 
 export const Navbar = ({ activeTab, setActiveTab, user, addToast }) => {
   const handleSignOut = async () => {
@@ -16,7 +17,7 @@ export const Navbar = ({ activeTab, setActiveTab, user, addToast }) => {
   return (
     <nav className="navbar glass-panel">
       <a href="#" className="nav-brand" onClick={(e) => { e.preventDefault(); if (user) setActiveTab('catalog'); }}>
-        <Clapperboard size={28} />
+        <img src={iconeApp} alt="CineList Logo" className="nav-logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
         <span>CineList</span>
       </a>
 
@@ -38,6 +39,14 @@ export const Navbar = ({ activeTab, setActiveTab, user, addToast }) => {
             >
               <Heart size={18} />
               <span>Favoritos</span>
+            </button>
+            <button 
+              className={`nav-link ${activeTab === 'quiz' ? 'active' : ''}`}
+              onClick={() => setActiveTab('quiz')}
+              style={{ background: 'transparent', border: 'none' }}
+            >
+              <Gamepad2 size={18} />
+              <span>CineQuiz</span>
             </button>
             <button 
               className={`nav-link ${activeTab === 'profile' ? 'active' : ''}`}

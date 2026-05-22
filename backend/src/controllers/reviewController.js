@@ -14,7 +14,7 @@ export const getReviews = async (req, res) => {
 
 // Criar nova avaliação para um filme
 export const createReview = async (req, res) => {
-  const { movie_id, rating, comment } = req.body;
+  const { movie_id, rating, comment, is_spoiler } = req.body;
   
   // Dados injetados pelo middleware requireAuth
   const user_id = req.user.id;
@@ -35,7 +35,8 @@ export const createReview = async (req, res) => {
       user_id,
       user_email,
       rating: ratingNum,
-      comment
+      comment,
+      is_spoiler: !!is_spoiler
     }, req.supabase);
     res.status(201).json(review);
   } catch (error) {
