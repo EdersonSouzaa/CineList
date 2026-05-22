@@ -1,5 +1,5 @@
 import React from 'react';
-import { Film, Heart, LogOut, Clapperboard } from 'lucide-react';
+import { Film, Heart, LogOut, Clapperboard, User } from 'lucide-react';
 import { supabase } from '../services/supabase.js';
 
 export const Navbar = ({ activeTab, setActiveTab, user, addToast }) => {
@@ -38,6 +38,14 @@ export const Navbar = ({ activeTab, setActiveTab, user, addToast }) => {
             >
               <Heart size={18} />
               <span>Favoritos</span>
+            </button>
+            <button 
+              className={`nav-link ${activeTab === 'profile' ? 'active' : ''}`}
+              onClick={() => setActiveTab('profile')}
+              style={{ background: 'transparent', border: 'none' }}
+            >
+              <User size={18} />
+              <span>Perfil</span>
             </button>
           </div>
 

@@ -1,7 +1,7 @@
 import React from 'react';
-import { Star, Trash2 } from 'lucide-react';
+import { Star, Trash2, Heart } from 'lucide-react';
 
-export const ReviewList = ({ reviews, currentUser, onDeleteReview }) => {
+export const ReviewList = ({ reviews, currentUser, onDeleteReview, onLikeReview }) => {
   if (!reviews || reviews.length === 0) {
     return <p className="no-reviews">Nenhuma avaliação ainda para este filme. Seja o primeiro a comentar!</p>;
   }
@@ -26,6 +26,7 @@ export const ReviewList = ({ reviews, currentUser, onDeleteReview }) => {
       {reviews.map((review) => {
         // Verifica se a avaliação pertence ao usuário atualmente logado
         const isOwner = currentUser && currentUser.id === review.user_id;
+        const hasLiked = currentUser && review.liked_by_users?.includes(currentUser.id);
 
         return (
           <div key={review.id} className="review-item">
@@ -63,6 +64,17 @@ export const ReviewList = ({ reviews, currentUser, onDeleteReview }) => {
               </div>
             </div>
             {review.comment && <p className="review-comment">{review.comment}</p>}
+            
+            <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '0.4rem' }}>
+              <button
+                className={`review-like-btn ${hasLiked ? 'liked' : ''}`}
+                onClick={() => onLikeReview && onLikeReview(review.id)}
+                title={hasLiked ? "Remover curtida" : "Curtir comentário"}
+              >
+                <Heart size={14} />
+                <span>{review.like_count || 0}</span>
+              </button>
+            </div>
           </div>
         );
       })}

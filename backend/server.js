@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 // Nota: A rota de filmes foi removida — o catálogo agora vem diretamente da API do TMDB (frontend)
 import reviewRoutes from './src/routes/reviewRoutes.js';
 import favoriteRoutes from './src/routes/favoriteRoutes.js';
+import tmdbRoutes from './src/routes/tmdbRoutes.js';
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use(express.json());
 // Endpoints da API (avaliações e favoritos — catálogo vem do TMDB)
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/favorites', favoriteRoutes);
+app.use('/api/tmdb', tmdbRoutes);
 
 // Health Check de rotas
 app.get('/health', (req, res) => {

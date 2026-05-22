@@ -5,6 +5,7 @@ import Toast from './components/Toast.jsx';
 import Auth from './pages/Auth.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Favorites from './pages/Favorites.jsx';
+import Profile from './pages/Profile.jsx';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -71,8 +72,10 @@ function App() {
           <Auth addToast={addToast} />
         ) : activeTab === 'catalog' ? (
           <Dashboard user={user} addToast={addToast} />
-        ) : (
+        ) : activeTab === 'favorites' ? (
           <Favorites user={user} addToast={addToast} />
+        ) : (
+          <Profile user={user} addToast={addToast} />
         )}
       </main>
 

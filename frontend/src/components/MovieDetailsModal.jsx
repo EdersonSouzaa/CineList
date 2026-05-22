@@ -158,22 +158,80 @@ export const MovieDetailsModal = ({ movie, user, onClose, addToast, onReviewAdde
               </div>
 
               <h4 className="modal-overview-title">Sinopse</h4>
-              <p className="modal-overview">
+              <p className="modal-overview" style={{ marginBottom: 0 }}>
                 {details.overview || 'Sinopse indisponível para este título.'}
               </p>
             </div>
           </div>
+
+          {/* Seção extra: Onde assistir & Trailer oficial */}
+          {(details.watch_providers?.flatrate?.length > 0 || details.trailer_url) && (
+            <div className="modal-extra-section">
+              {details.watch_providers?.flatrate?.length > 0 && (
+                <div className="providers-container">
+                  <h5 className="providers-title">Onde assistir (Brasil)</h5>
+                  <div className="providers-list">
+                    {details.watch_providers.flatrate.map((provider, idx) => (
+                      <div key={idx} className="provider-item" title={provider.name}>
+                        {provider.logo && (
+                          <img src={provider.logo} alt={provider.name} className="provider-logo" />
+                        )}
+                        <span>{provider.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {details.trailer_url && (
+                <div className="trailer-container">
+                  <h4 className="modal-overview-title" style={{ marginBottom: '0.6rem' }}>Trailer Oficial</h4>
+                  <div className="trailer-wrapper">
+                    <iframe
+                      src={details.trailer_url}
+                      title="Trailer oficial"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="movie-reviews-section">
             <div>
               <ReviewForm onSubmitReview={handleSubmitReview} isSubmitting={submitting} />
             </div>
 
+            <div className="reviews-separator" />
+
             <div>
               <h3 className="review-form-title" style={{ marginBottom: '1.2rem' }}>
                 <Film size={20} style={{ color: 'var(--accent)' }} />
                 <span>Opinião da Comunidade</span>
               </h3>
+
+              {reviews.length > 0 && (
+                <div className="ratings-chart" style={{ marginBottom: '1.5rem' }}>
+                  <h4 className="chart-title">Distribuição de Avaliações ({reviews.length} {reviews.length === 1 ? 'comentário' : 'comentários'})</h4>
+                  {[5, 4, 3, 2, 1].map(star => {
+                    const count = reviews.filter(r => Math.round(r.rating) === star).length;
+                    const pct = (count / reviews.length) * 100;
+                    return (
+                      <div key={star} className="chart-row">
+                        <span className="chart-label">
+                          {star} <Star size={12} style={{ fill: 'var(--warning)', color: 'var(--warning)' }} />
+                        </span>
+                        <div className="chart-bar-bg">
+                          <div className="chart-bar-fill" style={{ width: `${pct}%` }} />
+                        </div>
+                        <span className="chart-count">{count}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
 
               {loadingRevs ? (
                 <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem 0' }}>
@@ -184,6 +242,24 @@ export const MovieDetailsModal = ({ movie, user, onClose, addToast, onReviewAdde
                   reviews={reviews}
                   currentUser={user}
                   onDeleteReview={handleDeleteReview}
+                  onLikeReview={async (reviewId) => {
+                    if (!user) {
+                      addToast('Faça login para curtir comentários!', 'info');
+                      return;
+                    }
+                    try {
+                      const data = await api.post(`/reviews/${reviewId}/like`);
+                      setReviews(prev =>
+                        prev.map(r =>
+                          r.id === reviewId
+                            ? { ...r, like_count: data.like_count, liked_by_users: data.liked_by_users }
+                            : r
+                        )
+                      );
+                    } catch (err) {
+                      addToast('Não foi possível registrar a curtida.', 'error');
+                    }
+                  }}
                 />
               )}
             </div>

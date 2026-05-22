@@ -60,3 +60,15 @@ export const deleteReview = async (req, res) => {
     res.status(500).json({ error: 'Erro ao tentar excluir a avaliação.' });
   }
 };
+
+// Obter avaliações do usuário autenticado
+export const getMyReviews = async (req, res) => {
+  const user_id = req.user.id;
+  try {
+    const reviews = await Review.getByUserId(user_id, req.supabase);
+    res.json(reviews);
+  } catch (error) {
+    console.error('Erro ao buscar avaliações do usuário:', error);
+    res.status(500).json({ error: 'Erro ao buscar suas avaliações.' });
+  }
+};

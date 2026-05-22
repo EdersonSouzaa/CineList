@@ -1,15 +1,12 @@
-// Serviço de integração com a API do TMDB (The Movie Database)
+// Serviço de integração com o TMDB (através do proxy do Backend para maior segurança)
 // Documentação: https://developer.themoviedb.org/docs
-// Chave configurada em frontend/.env como VITE_TMDB_KEY
 
-const TMDB_KEY = import.meta.env.VITE_TMDB_KEY;
-const BASE_URL = 'https://api.themoviedb.org/3';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 const IMG_BASE = 'https://image.tmdb.org/t/p/w500';
 const BACKDROP_BASE = 'https://image.tmdb.org/t/p/w1280';
-const LANG = 'pt-BR';
 
-// Mapa de IDs de gêneros para nome (TMDB não retorna nome nos endpoints de listagem)
-const MOVIE_GENRES = {
+// Mapa de IDs de gêneros para nome
+export const MOVIE_GENRES = {
   28: 'Ação', 12: 'Aventura', 16: 'Animação', 35: 'Comédia',
   80: 'Crime', 99: 'Documentário', 18: 'Drama', 10751: 'Família',
   14: 'Fantasia', 36: 'História', 27: 'Terror', 10402: 'Música',
@@ -17,7 +14,7 @@ const MOVIE_GENRES = {
   10770: 'Cinema TV', 53: 'Thriller', 10752: 'Guerra', 37: 'Faroeste',
 };
 
-const TV_GENRES = {
+export const TV_GENRES = {
   10759: 'Ação & Aventura', 16: 'Animação', 35: 'Comédia', 80: 'Crime',
   99: 'Documentário', 18: 'Drama', 10751: 'Família', 10762: 'Kids',
   9648: 'Mistério', 10763: 'Notícias', 10764: 'Reality', 10765: 'Sci-Fi & Fantasia',
@@ -48,20 +45,16 @@ export const normalizeItem = (item, mediaType = 'movie') => {
   };
 };
 
-// Requisição genérica autenticada ao TMDB
+// Chamada genérica de proxy para o backend
 const fetchTMDB = async (endpoint, params = {}) => {
-  if (!TMDB_KEY) {
-    throw new Error('Chave da API do TMDB não configurada. Adicione VITE_TMDB_KEY no arquivo frontend/.env');
-  }
-  const url = new URL(`${BASE_URL}${endpoint}`);
-  url.searchParams.set('api_key', TMDB_KEY);
-  url.searchParams.set('language', LANG);
+  const url = new URL(`${API_URL}/tmdb`);
+  url.searchParams.set('path', endpoint);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 
   const res = await fetch(url.toString());
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.status_message || `Erro ${res.status} ao acessar o TMDB`);
+    throw new Error(err.error || err.status_message || `Erro ${res.status} ao acessar o TMDB`);
   }
   return res.json();
 };
@@ -104,10 +97,7 @@ export const getAiringToday = async (page = 1) => {
   return data.results.map(m => normalizeItem(m, 'tv'));
 };
 
-/**
- * Busca unificada por texto (filmes + séries)
- * Filtra resultados com poster e com votos suficientes
- */
+/** Busca unificada por texto (filmes + séries) */
 export const searchMulti = async (query, page = 1) => {
   if (!query.trim()) return [];
   const data = await fetchTMDB('/search/multi', { query, page, include_adult: false });
@@ -116,15 +106,66 @@ export const searchMulti = async (query, page = 1) => {
     .map(r => normalizeItem(r, r.media_type));
 };
 
-/**
- * Detalhes completos de um item (inclui gêneros por nome, runtime, etc.)
- */
+/** Busca avançada com filtros (Discover) */
+export const discoverContent = async (mediaType = 'movie', filters = {}, page = 1) => {
+  const params = { page };
+  if (filters.genre) {
+    params.with_genres = filters.genre;
+  }
+  if (filters.year) {
+    if (mediaType === 'movie') {
+      params.primary_release_year = filters.year;
+    } else {
+      params.first_air_date_year = filters.year;
+    }
+  }
+  if (filters.sortBy) {
+    params.sort_by = filters.sortBy;
+  } else {
+    params.sort_by = 'popularity.desc';
+  }
+
+  const data = await fetchTMDB(`/discover/${mediaType}`, params);
+  return data.results.map(item => normalizeItem(item, mediaType));
+};
+
+/** Detalhes completos de um item (inclui créditos, watch/providers e vídeos) */
 export const getDetails = async (tmdbId, mediaType) => {
   const endpoint = mediaType === 'movie' ? `/movie/${tmdbId}` : `/tv/${tmdbId}`;
-  const data = await fetchTMDB(endpoint, { append_to_response: 'credits' });
+  
+  // Usamos append_to_response para obter créditos (elenco), provedores de streaming e vídeos na mesma chamada!
+  const data = await fetchTMDB(endpoint, { append_to_response: 'credits,watch/providers,videos' });
 
   const genreNames = (data.genres || []).map(g => g.name).join(', ');
   const releaseDate = data.release_date || data.first_air_date || null;
+
+  // Processar watch providers (Brasil)
+  const providersBR = data['watch/providers']?.results?.BR || {};
+  const flatrate = providersBR.flatrate || [];
+  const buy = providersBR.buy || [];
+  const rent = providersBR.rent || [];
+  
+  const formatProvider = (p) => ({
+    name: p.provider_name,
+    logo: p.logo_path ? `https://image.tmdb.org/t/p/w92${p.logo_path}` : null,
+  });
+
+  const watchProviders = {
+    flatrate: flatrate.map(formatProvider),
+    buy: buy.map(formatProvider),
+    rent: rent.map(formatProvider),
+    link: providersBR.link || null,
+  };
+
+  // Processar vídeos (buscar trailer oficial no YouTube)
+  const videos = data.videos?.results || [];
+  const trailer = videos.find(v => v.site === 'YouTube' && v.type === 'Trailer') ||
+                  videos.find(v => v.site === 'YouTube' && (v.type === 'Teaser' || v.type === 'Clip')) ||
+                  videos[0];
+  
+  const trailerUrl = trailer && trailer.site === 'YouTube'
+    ? `https://www.youtube.com/embed/${trailer.key}`
+    : null;
 
   return {
     id: `${mediaType}_${data.id}`,
@@ -141,5 +182,7 @@ export const getDetails = async (tmdbId, mediaType) => {
     runtime: data.runtime || (data.episode_run_time?.[0]) || null,
     tagline: data.tagline || null,
     status: data.status || null,
+    watch_providers: watchProviders,
+    trailer_url: trailerUrl,
   };
 };

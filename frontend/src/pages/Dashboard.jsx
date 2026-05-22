@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Search, TrendingUp, Film, Tv, Clapperboard, Loader2 } from 'lucide-react';
+import { Search, TrendingUp, Film, Tv, Clapperboard, Loader2, SlidersHorizontal, Trash2, Shuffle } from 'lucide-react';
 import { api } from '../services/api.js';
 import {
   getTrendingMovies,
@@ -9,6 +9,10 @@ import {
   getNowPlaying,
   getAiringToday,
   searchMulti,
+  discoverContent,
+  getDetails,
+  MOVIE_GENRES,
+  TV_GENRES,
 } from '../services/tmdb.js';
 import MovieCard from '../components/MovieCard.jsx';
 import MovieDetailsModal from '../components/MovieDetailsModal.jsx';
@@ -32,6 +36,21 @@ const fetchByTab = async (tab, page = 1) => {
   }
 };
 
+const SkeletonLoader = () => (
+  <div className="skeleton-grid">
+    {[...Array(8)].map((_, i) => (
+      <div key={i} className="skeleton-card">
+        <div className="skeleton-shimmer" />
+        <div className="skeleton-poster" />
+        <div className="skeleton-info">
+          <div className="skeleton-line skeleton-title" />
+          <div className="skeleton-line skeleton-meta" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
 export const Dashboard = ({ user, addToast }) => {
   const [items, setItems]           = useState([]);
   const [favorites, setFavorites]   = useState([]);
@@ -43,46 +62,188 @@ export const Dashboard = ({ user, addToast }) => {
   const [searching, setSearching]   = useState(false);
   const [page, setPage]             = useState(1);
   const [selectedMovie, setSelectedMovie] = useState(null);
-  const searchTimeout               = useRef(null);
-  const isSearching                 = search.trim().length > 0;
+  const [loadingRandom, setLoadingRandom] = useState(false);
 
-  // Carrega favoritos do backend (apenas IDs string "movie_123")
+  // Seleciona um filme ou série aleatória garantindo trailer e watch providers
+  const handleRandomSelect = async () => {
+    setLoadingRandom(true);
+    try {
+      let selectedDetails = null;
+      let candidates = [];
+
+      if (isSearching) {
+        candidates = [...searchResults];
+      } else if (isFilterActive) {
+        candidates = [...items];
+      } else {
+        // Busca de uma página aleatória do TMDB (1 a 5)
+        const randomPage = Math.floor(Math.random() * 5) + 1;
+        
+        if (activeTab === 'trending') {
+          const pickMovie = Math.random() > 0.5;
+          if (pickMovie) {
+            candidates = await getTrendingMovies(randomPage);
+          } else {
+            candidates = await getTrendingTV(randomPage);
+          }
+        } else if (activeTab === 'movies') {
+          candidates = await getPopularMovies(randomPage);
+        } else if (activeTab === 'tv') {
+          candidates = await getPopularTV(randomPage);
+        } else if (activeTab === 'nowplaying') {
+          const pickMovie = Math.random() > 0.5;
+          if (pickMovie) {
+            candidates = await getNowPlaying(randomPage);
+          } else {
+            candidates = await getAiringToday(randomPage);
+          }
+        }
+      }
+
+      if (!candidates || candidates.length === 0) {
+        addToast('Nenhum título disponível para escolher.', 'info');
+        setLoadingRandom(false);
+        return;
+      }
+
+      // Embaralhar candidatos para garantir aleatoriedade real
+      const shuffled = candidates.sort(() => Math.random() - 0.5);
+
+      // Limitar a busca sequencial a no máximo 15 candidatos para evitar sobrecarga de rede
+      const maxChecks = Math.min(shuffled.length, 15);
+      
+      // Abre uma notificação indicando que estamos procurando uma produção bem completa
+      addToast('Procurando um título completo com trailer e streaming...', 'info');
+
+      for (let i = 0; i < maxChecks; i++) {
+        const candidate = shuffled[i];
+        try {
+          const details = await getDetails(candidate.tmdb_id, candidate.media_type);
+          const hasTrailer = !!details.trailer_url;
+          const hasStreaming = details.watch_providers?.flatrate?.length > 0;
+
+          if (hasTrailer && hasStreaming) {
+            selectedDetails = details;
+            break;
+          }
+        } catch (e) {
+          // Ignora erros de rede individuais e passa para o próximo
+        }
+      }
+
+      // Se nenhum candidato tiver ambos, tenta buscar qualquer um com pelo menos um dos recursos (trailer ou streaming)
+      if (!selectedDetails) {
+        for (let i = 0; i < maxChecks; i++) {
+          const candidate = shuffled[i];
+          try {
+            const details = await getDetails(candidate.tmdb_id, candidate.media_type);
+            const hasTrailer = !!details.trailer_url;
+            const hasStreaming = details.watch_providers?.flatrate?.length > 0;
+
+            if (hasTrailer || hasStreaming) {
+              selectedDetails = details;
+              break;
+            }
+          } catch (e) {
+            // Ignora erros
+          }
+        }
+      }
+
+      // Fallback final: se ainda não encontrou nada enriquecido, pega o primeiro da lista
+      if (!selectedDetails && shuffled.length > 0) {
+        try {
+          selectedDetails = await getDetails(shuffled[0].tmdb_id, shuffled[0].media_type);
+        } catch (e) {
+          selectedDetails = shuffled[0];
+        }
+      }
+
+      if (selectedDetails) {
+        setSelectedMovie(selectedDetails);
+        addToast(`Aleatório selecionado: ${selectedDetails.title}`, 'success');
+      } else {
+        addToast('Não foi possível selecionar um item aleatório.', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      addToast('Erro ao obter recomendação aleatória.', 'error');
+    } finally {
+      setLoadingRandom(false);
+    }
+  };
+  
+  // Filtros avançados
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    mediaType: 'movie',
+    genre: '',
+    year: '',
+    sortBy: 'popularity.desc',
+  });
+
+  const searchTimeout               = useRef(null);
+  const loadMoreRef                 = useRef(null);
+  const isSearching                 = search.trim().length > 0;
+  
+  const isFilterActive = filters.genre !== '' || filters.year !== '' || filters.sortBy !== 'popularity.desc';
+
+  // Carrega favoritos do backend
   const loadFavorites = useCallback(async () => {
     if (!user) return;
     try {
       const data = await api.get('/favorites');
-      // movie_id é armazenado como string "movie_123" ou "tv_456"
       setFavorites(data.map(f => String(f.movie_id)));
     } catch { /* silencioso */ }
   }, [user]);
 
-  // Carrega catálogo de acordo com a aba
-  const loadCatalog = useCallback(async (tab, pg = 1) => {
+  // Carrega catálogo ou discover
+  const loadData = useCallback(async (pg = 1) => {
     if (pg === 1) setLoading(true);
     else setLoadingMore(true);
     try {
-      const data = await fetchByTab(tab, pg);
-      // Na aba trending mistura filmes e séries; ordena por popularidade
-      const sorted = tab === 'trending' || tab === 'nowplaying'
-        ? [...data].sort((a, b) => b.popularity - a.popularity)
-        : data;
-      setItems(prev => pg === 1 ? sorted : [...prev, ...sorted]);
+      let data = [];
+      if (isFilterActive) {
+        data = await discoverContent(filters.mediaType, {
+          genre: filters.genre,
+          year: filters.year,
+          sortBy: filters.sortBy
+        }, pg);
+      } else {
+        data = await fetchByTab(activeTab, pg);
+        // Na aba trending mistura filmes e séries; ordena por popularidade
+        if (activeTab === 'trending' || activeTab === 'nowplaying') {
+          data = [...data].sort((a, b) => b.popularity - a.popularity);
+        }
+      }
+      setItems(prev => pg === 1 ? data : [...prev, ...data]);
     } catch (err) {
       console.error(err);
-      addToast(err.message || 'Erro ao carregar catálogo do TMDB.', 'error');
+      addToast(err.message || 'Erro ao carregar catálogo.', 'error');
     } finally {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [addToast]);
+  }, [activeTab, filters, isFilterActive, addToast]);
 
-  // Troca de aba
+  // Reset de filtros quando muda aba do catálogo
   useEffect(() => {
+    setFilters({
+      mediaType: activeTab === 'tv' ? 'tv' : 'movie',
+      genre: '',
+      year: '',
+      sortBy: 'popularity.desc',
+    });
     setPage(1);
     setSearch('');
-    loadCatalog(activeTab, 1);
     loadFavorites();
-  }, [activeTab]);
+  }, [activeTab, loadFavorites]);
+
+  // Carrega dados quando filtros mudam
+  useEffect(() => {
+    setPage(1);
+    loadData(1);
+  }, [filters, loadData]);
 
   // Busca ao vivo com debounce de 400ms
   useEffect(() => {
@@ -101,6 +262,31 @@ export const Dashboard = ({ user, addToast }) => {
     }, 400);
     return () => clearTimeout(searchTimeout.current);
   }, [search]);
+
+  // Infinite Scroll usando IntersectionObserver
+  useEffect(() => {
+    if (isSearching) return;
+    const observer = new IntersectionObserver((entries) => {
+      const first = entries[0];
+      if (first.isIntersecting && !loading && !loadingMore) {
+        setPage(prev => {
+          const nextPage = prev + 1;
+          loadData(nextPage);
+          return nextPage;
+        });
+      }
+    }, { threshold: 0.1 });
+
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [loading, loadingMore, isSearching, loadData]);
 
   const handleToggleFavorite = async (movieId) => {
     if (!user) {
@@ -124,17 +310,28 @@ export const Dashboard = ({ user, addToast }) => {
     }
   };
 
-  const handleLoadMore = () => {
-    const nextPage = page + 1;
-    setPage(nextPage);
-    loadCatalog(activeTab, nextPage);
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      mediaType: activeTab === 'tv' ? 'tv' : 'movie',
+      genre: '',
+      year: '',
+      sortBy: 'popularity.desc',
+    });
   };
 
   const displayItems = isSearching ? searchResults : items;
+  const genresToUse = filters.mediaType === 'movie' ? MOVIE_GENRES : TV_GENRES;
 
   return (
     <div>
-      {/* Barra de busca */}
+      {/* Barra de busca e Botão Filtros */}
       <div className="search-bar-container">
         <div className="search-input-wrapper">
           {searching
@@ -151,15 +348,95 @@ export const Dashboard = ({ user, addToast }) => {
           {search && (
             <button
               onClick={() => setSearch('')}
-              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0 0.5rem' }}
+              className="search-clear-btn"
               title="Limpar busca"
             >✕</button>
           )}
         </div>
+
+        {!isSearching && (
+          <button
+            className={`filter-toggle-btn ${showFilters ? 'active' : ''}`}
+            onClick={() => setShowFilters(!showFilters)}
+            title="Filtros avançados"
+          >
+            <SlidersHorizontal size={18} />
+            <span>Filtros</span>
+          </button>
+        )}
       </div>
 
-      {/* Abas de categoria (ocultas durante busca) */}
-      {!isSearching && (
+      {/* Painel de Filtros Avançados */}
+      {!isSearching && showFilters && (
+        <div className="filters-panel">
+          <div className="filter-group">
+            <label>Tipo</label>
+            <select
+              value={filters.mediaType}
+              onChange={e => handleFilterChange('mediaType', e.target.value)}
+              className="filter-select"
+            >
+              <option value="movie">Filmes</option>
+              <option value="tv">Séries</option>
+            </select>
+          </div>
+
+          <div className="filter-group">
+            <label>Gênero</label>
+            <select
+              value={filters.genre}
+              onChange={e => handleFilterChange('genre', e.target.value)}
+              className="filter-select"
+            >
+              <option value="">Todos os Gêneros</option>
+              {Object.entries(genresToUse).map(([id, name]) => (
+                <option key={id} value={id}>{name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="filter-group">
+            <label>Ano</label>
+            <input
+              type="number"
+              min="1900"
+              max={new Date().getFullYear()}
+              placeholder="Ex: 2024"
+              value={filters.year}
+              onChange={e => handleFilterChange('year', e.target.value)}
+              className="filter-input"
+            />
+          </div>
+
+          <div className="filter-group">
+            <label>Ordenar por</label>
+            <select
+              value={filters.sortBy}
+              onChange={e => handleFilterChange('sortBy', e.target.value)}
+              className="filter-select"
+            >
+              <option value="popularity.desc">Mais Populares</option>
+              <option value="vote_average.desc">Melhor Avaliados</option>
+              <option value="primary_release_date.desc">Mais Recentes</option>
+              <option value="vote_count.desc">Mais Votados</option>
+            </select>
+          </div>
+
+          {isFilterActive && (
+            <button
+              onClick={handleClearFilters}
+              className="filter-clear-btn"
+              title="Limpar Filtros"
+            >
+              <Trash2 size={16} />
+              <span>Limpar</span>
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Abas de categoria (ocultas durante busca ou se filtro ativo) */}
+      {!isSearching && !isFilterActive && (
         <div className="catalog-tabs">
           {TABS.map(tab => {
             const Icon = tab.icon;
@@ -174,20 +451,31 @@ export const Dashboard = ({ user, addToast }) => {
               </button>
             );
           })}
+
+          <button
+            className="random-select-btn"
+            onClick={handleRandomSelect}
+            disabled={loadingRandom}
+            title="Ver algo aleatório"
+          >
+            {loadingRandom ? (
+              <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
+            ) : (
+              <Shuffle size={16} />
+            )}
+            <span>Aleatório</span>
+          </button>
         </div>
       )}
 
       {/* Grid de filmes/séries */}
       {loading ? (
-        <div className="loading-container">
-          <div className="spinner" />
-          <p>Buscando conteúdo no TMDB...</p>
-        </div>
+        <SkeletonLoader />
       ) : displayItems.length === 0 ? (
         <div className="no-data-card glass-panel">
           <Search size={48} />
           <h3>{isSearching ? 'Nenhum resultado encontrado' : 'Nenhum conteúdo disponível'}</h3>
-          <p>{isSearching ? `Tente outro título para "${search}".` : 'Tente mudar de categoria ou verifique sua chave do TMDB.'}</p>
+          <p>{isSearching ? `Tente outro título para "${search}".` : 'Tente mudar de categoria ou limpar os filtros.'}</p>
         </div>
       ) : (
         <>
@@ -196,6 +484,15 @@ export const Dashboard = ({ user, addToast }) => {
               {searchResults.length} resultado(s) para "{search}"
             </p>
           )}
+          
+          {isFilterActive && !isSearching && (
+            <p style={{ color: 'var(--text-muted)', marginBottom: '1.2rem', fontSize: '0.9rem' }}>
+              Filtro ativo: {filters.mediaType === 'movie' ? 'Filmes' : 'Séries'}
+              {filters.genre && ` • ${genresToUse[filters.genre]}`}
+              {filters.year && ` • Ano ${filters.year}`}
+            </p>
+          )}
+
           <div className="movies-grid">
             {displayItems.map(item => (
               <MovieCard
@@ -208,20 +505,15 @@ export const Dashboard = ({ user, addToast }) => {
             ))}
           </div>
 
-          {/* Botão Carregar Mais (apenas no catálogo, não na busca) */}
+          {/* Elemento observador para Scroll Infinito */}
           {!isSearching && (
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2.5rem' }}>
-              <button
-                className="btn-load-more"
-                onClick={handleLoadMore}
-                disabled={loadingMore}
-              >
-                {loadingMore ? (
-                  <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Carregando...</>
-                ) : (
-                  'Carregar Mais'
-                )}
-              </button>
+            <div ref={loadMoreRef} style={{ display: 'flex', justifyContent: 'center', margin: '2.5rem 0' }}>
+              {loadingMore && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)' }}>
+                  <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} />
+                  <span>Carregando mais conteúdo...</span>
+                </div>
+              )}
             </div>
           )}
         </>
@@ -233,7 +525,7 @@ export const Dashboard = ({ user, addToast }) => {
           user={user}
           onClose={() => setSelectedMovie(null)}
           addToast={addToast}
-          onReviewAdded={() => {}} // reviews são por ID TMDB no backend
+          onReviewAdded={loadFavorites} // atualiza favoritos caso mude
         />
       )}
     </div>
