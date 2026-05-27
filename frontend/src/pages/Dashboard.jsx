@@ -63,6 +63,7 @@ export const Dashboard = ({ user, addToast }) => {
   const [page, setPage]             = useState(1);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [loadingRandom, setLoadingRandom] = useState(false);
+  const [hasError, setHasError]     = useState(false);
 
   // Seleciona um filme ou série aleatória garantindo trailer e watch providers
   const handleRandomSelect = async () => {
@@ -202,6 +203,7 @@ export const Dashboard = ({ user, addToast }) => {
   const loadData = useCallback(async (pg = 1) => {
     if (pg === 1) setLoading(true);
     else setLoadingMore(true);
+    setHasError(false);
     try {
       let data = [];
       if (isFilterActive) {
@@ -222,6 +224,7 @@ export const Dashboard = ({ user, addToast }) => {
     } catch (err) {
       console.error(err);
       addToast(err.message || 'Erro ao carregar catálogo.', 'error');
+      setHasError(true);
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -239,6 +242,7 @@ export const Dashboard = ({ user, addToast }) => {
     });
     setPage(1);
     setSearch('');
+    setHasError(false);
     loadFavorites();
   }, [activeTab, loadFavorites]);
 
@@ -268,7 +272,7 @@ export const Dashboard = ({ user, addToast }) => {
 
   // Infinite Scroll usando IntersectionObserver
   useEffect(() => {
-    if (isSearching) return;
+    if (isSearching || hasError) return;
     const observer = new IntersectionObserver((entries) => {
       const first = entries[0];
       if (first.isIntersecting && !loading && !loadingMore) {
@@ -289,7 +293,7 @@ export const Dashboard = ({ user, addToast }) => {
         observer.unobserve(currentRef);
       }
     };
-  }, [loading, loadingMore, isSearching, loadData]);
+  }, [loading, loadingMore, isSearching, loadData, hasError]);
 
   const handleToggleFavorite = async (movieId) => {
     if (!user) {
@@ -535,11 +539,45 @@ export const Dashboard = ({ user, addToast }) => {
 
           {/* Elemento observador para Scroll Infinito */}
           {!isSearching && (
-            <div ref={loadMoreRef} style={{ display: 'flex', justifyContent: 'center', margin: '2.5rem 0' }}>
-              {loadingMore && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)' }}>
-                  <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} />
-                  <span>Carregando mais conteúdo...</span>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', margin: '2.5rem 0' }}>
+              {hasError ? (
+                <button
+                  onClick={() => {
+                    setHasError(false);
+                    loadData(page);
+                  }}
+                  className="btn-retry"
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.08)',
+                    border: '1px solid rgba(239, 68, 68, 0.25)',
+                    color: '#f87171',
+                    padding: '0.65rem 1.5rem',
+                    borderRadius: '20px',
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                    fontWeight: '500',
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 4px 12px rgba(239, 68, 68, 0.05)',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)';
+                    e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = 'rgba(239, 68, 68, 0.08)';
+                    e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.25)';
+                  }}
+                >
+                  Erro ao carregar catálogo. Clique para tentar novamente.
+                </button>
+              ) : (
+                <div ref={loadMoreRef} style={{ height: '20px', width: '100%', display: 'flex', justifyContent: 'center' }}>
+                  {loadingMore && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)' }}>
+                      <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} />
+                      <span>Carregando mais conteúdo...</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
