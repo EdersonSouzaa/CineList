@@ -47,7 +47,7 @@ export const normalizeItem = (item, mediaType = 'movie') => {
 
 // Chamada genérica de proxy para o backend
 const fetchTMDB = async (endpoint, params = {}) => {
-  const url = new URL(`${API_URL}/tmdb`);
+  const url = new URL(`${API_URL}/tmdb`, window.location.origin);
   url.searchParams.set('path', endpoint);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 
