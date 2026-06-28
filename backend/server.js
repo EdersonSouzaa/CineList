@@ -43,10 +43,18 @@ app.use(cors({
 app.use(express.json());
 
 // Endpoints da API (avaliações e favoritos — catálogo vem do TMDB)
+// Registrados com e sem prefixo "/api" para total compatibilidade com o roteamento Serverless da Vercel
 app.use('/api/reviews', reviewRoutes);
+app.use('/reviews', reviewRoutes);
+
 app.use('/api/favorites', favoriteRoutes);
+app.use('/favorites', favoriteRoutes);
+
 app.use('/api/tmdb', tmdbRoutes);
+app.use('/tmdb', tmdbRoutes);
+
 app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
 
 // Health Check de rotas
 app.get('/', (req, res) => {
@@ -55,8 +63,21 @@ app.get('/', (req, res) => {
     status: 'online'
   });
 });
+app.get('/api', (req, res) => {
+  res.json({ 
+    message: 'Bem-vindo à API do CineList!',
+    status: 'online'
+  });
+});
 
 app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    message: 'Servidor CineList está ativo e pronto!' 
+  });
+});
+app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
