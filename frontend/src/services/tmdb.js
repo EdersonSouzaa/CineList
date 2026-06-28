@@ -1,7 +1,23 @@
 // Serviço de integração com o TMDB (através do proxy do Backend para maior segurança)
 // Documentação: https://developer.themoviedb.org/docs
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const getApiUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  const isLocalHost = typeof window !== 'undefined' && 
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+  // Se a variável estiver definida e NÃO apontar para localhost (ou se estiver rodando localmente)
+  if (envUrl && (!envUrl.includes('localhost') && !envUrl.includes('127.0.0.1') || isLocalHost)) {
+    return envUrl;
+  }
+  // Se estiver em produção, aponta diretamente para o backend do Render
+  if (typeof window !== 'undefined' && !isLocalHost) {
+    return 'https://cinelist-m8q5.onrender.com/api';
+  }
+  return 'http://localhost:3001/api';
+};
+
+const API_URL = getApiUrl();
 const IMG_BASE = 'https://image.tmdb.org/t/p/w500';
 const BACKDROP_BASE = 'https://image.tmdb.org/t/p/w1280';
 
