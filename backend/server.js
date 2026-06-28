@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import reviewRoutes from './src/routes/reviewRoutes.js';
 import favoriteRoutes from './src/routes/favoriteRoutes.js';
 import tmdbRoutes from './src/routes/tmdbRoutes.js';
+import authRoutes from './src/routes/authRoutes.js';
 
 dotenv.config();
 
@@ -45,6 +46,7 @@ app.use(express.json());
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/tmdb', tmdbRoutes);
+app.use('/api/auth', authRoutes);
 
 // Health Check de rotas
 app.get('/', (req, res) => {

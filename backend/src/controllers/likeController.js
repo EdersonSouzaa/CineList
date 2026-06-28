@@ -1,58 +1,40 @@
-import { supabase as anonClient } from '../config/supabase.js';
+import { db } from '../config/db.js';
 
 export const toggleLikeReview = async (req, res) => {
   const { id: reviewId } = req.params;
   const userId = req.user.id;
-  const client = req.supabase || anonClient;
 
   try {
+    const likes = db.getCollection('review_likes');
+    
     // Verifica se a curtida já existe para este comentário e usuário
-    const { data: existingLike, error: fetchError } = await client
-      .from('review_likes')
-      .select('*')
-      .eq('review_id', reviewId)
-      .eq('user_id', userId)
-      .maybeSingle();
-
-    if (fetchError) throw fetchError;
-
+    const likeIndex = likes.findIndex(l => l.review_id === reviewId && l.user_id === userId);
+    
     let liked = false;
 
-    if (existingLike) {
+    if (likeIndex !== -1) {
       // Se já existe, remove a curtida
-      const { error: deleteError } = await client
-        .from('review_likes')
-        .delete()
-        .eq('review_id', reviewId)
-        .eq('user_id', userId);
-
-      if (deleteError) throw deleteError;
+      likes.splice(likeIndex, 1);
       liked = false;
     } else {
       // Se não existe, cria a nova curtida
-      const { error: insertError } = await client
-        .from('review_likes')
-        .insert({ review_id: reviewId, user_id: userId });
-
-      if (insertError) throw insertError;
+      likes.push({ review_id: reviewId, user_id: userId });
       liked = true;
     }
 
-    // Busca todas as curtidas atuais para retornar o número total atualizado e quem curtiu
-    const { data: allLikes, error: countError } = await client
-      .from('review_likes')
-      .select('user_id')
-      .eq('review_id', reviewId);
+    // Salva a coleção atualizada
+    db.saveCollection('review_likes', likes);
 
-    if (countError) throw countError;
+    // Filtra todas as curtidas atuais dessa avaliação para obter totais atualizados
+    const currentReviewLikes = likes.filter(l => l.review_id === reviewId);
 
     return res.json({
       liked,
-      like_count: allLikes.length,
-      liked_by_users: allLikes.map(l => l.user_id)
+      like_count: currentReviewLikes.length,
+      liked_by_users: currentReviewLikes.map(l => l.user_id)
     });
   } catch (error) {
-    console.error('Erro ao alternar curtida em avaliação:', error);
+    console.error('Erro ao alternar curtida em avaliação local:', error);
     return res.status(500).json({ error: 'Falha ao processar curtida no comentário.' });
   }
 };
