@@ -1765,6 +1765,12 @@ button, input, textarea {
 }
 
 @media (max-width: 768px) {
+  /* Desativa radial-gradients e background fixo no mobile para eliminar 100% o bug gráfico da GPU */
+  body {
+    background-image: none !important;
+    background-color: #0b101d !important;
+  }
+
   /* Desativa backdrop-filter globalmente no mobile para evitar glitches de renderização da GPU */
   *, *::before, *::after {
     backdrop-filter: none !important;
@@ -1902,19 +1908,33 @@ button, input, textarea {
   /* Grid de Filmes Adaptável (2 colunas em telas pequenas) */
   .movies-grid {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.8rem !important;
+    gap: 0.6rem !important;
   }
   .movie-card {
     border-radius: 12px !important;
+    height: 330px !important; /* Altura corrigida do card no mobile */
   }
   .movie-card-poster {
-    height: 230px !important; /* Altura do card menor para mobile */
+    height: 210px !important; /* Reduz altura do pôster no mobile para dar espaço ao texto */
   }
   .movie-card-info {
-    padding: 0.8rem !important;
+    padding: 0.6rem !important; /* Reduz padding interno no mobile */
   }
   .movie-title {
     font-size: 0.9rem !important;
+    margin-bottom: 0.2rem !important;
+  }
+  .movie-genre {
+    font-size: 0.72rem !important;
+    padding: 0.1rem 0.4rem !important;
+    display: block !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important; /* Trunca gêneros longos em uma linha para não empurrar metadados */
+    margin-bottom: 0.2rem !important;
+  }
+  .movie-meta {
+    font-size: 0.78rem !important;
   }
 
   /* Modal de Detalhes (Tela cheia com rolagem no mobile) */
