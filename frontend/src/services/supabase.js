@@ -1,10 +1,15 @@
 // Mock do cliente Supabase para rodar 100% localmente no Express
 const getApiUrl = () => {
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
+  const envUrl = import.meta.env.VITE_API_URL;
+  const isLocalHost = typeof window !== 'undefined' && 
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+  // Se a variável estiver definida e NÃO apontar para localhost (ou se estiver rodando localmente)
+  if (envUrl && (!envUrl.includes('localhost') && !envUrl.includes('127.0.0.1') || isLocalHost)) {
+    return envUrl;
   }
-  // Se estiver em produção (Vercel), aponta para o mesmo domínio (/api)
-  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+  // Se estiver em produção (Vercel/Render), aponta para o mesmo domínio (/api)
+  if (typeof window !== 'undefined' && !isLocalHost) {
     return `${window.location.origin}/api`;
   }
   return 'http://localhost:3001/api';
