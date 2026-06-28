@@ -1,6 +1,17 @@
 import { supabase } from './supabase.js';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const getApiUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  // Se estiver em produção (Vercel), aponta para o mesmo domínio (/api)
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return `${window.location.origin}/api`;
+  }
+  return 'http://localhost:3001/api';
+};
+
+const API_URL = getApiUrl();
 
 // Auxiliar para obter os cabeçalhos das requisições, injetando o token de sessão do Supabase se disponível
 const getHeaders = async () => {

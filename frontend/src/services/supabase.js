@@ -1,5 +1,16 @@
 // Mock do cliente Supabase para rodar 100% localmente no Express
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const getApiUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  // Se estiver em produção (Vercel), aponta para o mesmo domínio (/api)
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return `${window.location.origin}/api`;
+  }
+  return 'http://localhost:3001/api';
+};
+
+const API_URL = getApiUrl();
 
 // Armazena listeners do AuthStateChange
 const listeners = new Set();
