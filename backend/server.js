@@ -30,6 +30,13 @@ app.use('/api/favorites', favoriteRoutes);
 app.use('/api/tmdb', tmdbRoutes);
 
 // Health Check de rotas
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Bem-vindo à API do CineList!',
+    status: 'online'
+  });
+});
+
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'ok', 
