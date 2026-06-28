@@ -9,9 +9,9 @@ const getApiUrl = () => {
   if (envUrl && (!envUrl.includes('localhost') && !envUrl.includes('127.0.0.1') || isLocalHost)) {
     return envUrl;
   }
-  // Se estiver em produção (Vercel/Render), aponta para o mesmo domínio (/api)
+  // Se estiver em produção, aponta diretamente para o backend do Render
   if (typeof window !== 'undefined' && !isLocalHost) {
-    return `${window.location.origin}/api`;
+    return 'https://cinelist-m8q5.onrender.com/api';
   }
   return 'http://localhost:3001/api';
 };
