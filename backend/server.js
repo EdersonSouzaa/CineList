@@ -13,9 +13,26 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Habilitar CORS para o frontend local (React costuma rodar na 5173 por padrão com Vite)
+// Habilitar CORS para o frontend local e domínios de deploy (Render e Vercel)
+const allowedOrigins = [
+  'http://localhost:5173', 
+  'http://127.0.0.1:5173'
+];
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    
+    const isAllowed = allowedOrigins.includes(origin) || 
+                      origin.endsWith('.onrender.com') || 
+                      origin.endsWith('.vercel.app');
+                      
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      callback(new Error('Bloqueado pelo CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
