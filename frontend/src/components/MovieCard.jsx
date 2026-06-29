@@ -18,9 +18,9 @@ export const MovieCard = ({ movie, isFavorite, onToggleFavorite, onClick }) => {
   const year = movie.release_date ? movie.release_date.split('-')[0] : null;
 
   return (
-    <div className="movie-card glass-panel" onClick={onClick}>
+    <div className="movie-card" onClick={onClick}>
       {/* Badge Filme ou Série */}
-      <span className={`media-type-badge ${isTV ? 'badge-tv' : 'badge-movie'}`}>
+      <span className={`badge-type-overlay ${isTV ? 'badge-tv' : 'badge-movie'}`}>
         {isTV ? <Tv size={10} /> : <Film size={10} />}
         {isTV ? 'Série' : 'Filme'}
       </span>
@@ -50,18 +50,21 @@ export const MovieCard = ({ movie, isFavorite, onToggleFavorite, onClick }) => {
           <h3 className="movie-title" title={movie.title}>{movie.title}</h3>
           <span className="movie-genre">{movie.genre || 'Geral'}</span>
         </div>
+        
         <div className="movie-meta">
-          <span>{year || 'N/A'}</span>
-          {displayRating ? (
-            <div className="movie-rating" title={displayRating.source === 'tmdb' ? 'Nota do TMDB' : 'Sua comunidade'}>
-              <Star size={14} style={{ fill: 'var(--warning)', color: 'var(--warning)' }} />
-              <span>{displayRating.value}</span>
-              {displayRating.source === 'tmdb' && (
-                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginLeft: '1px' }}>tmdb</span>
-              )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <div className="movie-rating">
+              <Star size={12} style={{ fill: 'var(--accent)', color: 'var(--accent)' }} />
+              <span>{displayRating ? displayRating.value : '0.0'}</span>
             </div>
-          ) : (
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Sem notas</span>
+            <span style={{ opacity: 0.6 }}>•</span>
+            <span>{year || 'N/A'}</span>
+          </div>
+
+          {movie.tmdb_rating && Number(movie.tmdb_rating) > 0 && (
+            <span className="badge-imdb-rating">
+              TMDB {Number(movie.tmdb_rating).toFixed(1)}
+            </span>
           )}
         </div>
       </div>

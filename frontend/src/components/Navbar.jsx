@@ -59,6 +59,9 @@ export const Navbar = ({ activeTab, setActiveTab, user, addToast }) => {
           </div>
 
           <div className="nav-user">
+            <div className="nav-avatar">
+              <User size={16} />
+            </div>
             <span className="user-email" title={user.email}>{user.email}</span>
             <button className="btn-signout" onClick={handleSignOut}>
               <LogOut size={16} />

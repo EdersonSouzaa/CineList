@@ -339,6 +339,19 @@ export const Dashboard = ({ user, addToast }) => {
 
   return (
     <div>
+      {/* Cabeçalho de Boas-vindas */}
+      <div className="dashboard-user-header">
+        <div className="dashboard-user-info">
+          <h2 className="dashboard-greeting">Hello {user?.email ? user.email.split('@')[0] : 'Cineast'}!</h2>
+          <span className="dashboard-subgreeting">Book your favorite movie</span>
+        </div>
+        <div className="dashboard-user-avatar">
+          <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--accent)' }}>
+            {user?.email ? user.email[0].toUpperCase() : 'U'}
+          </span>
+        </div>
+      </div>
+
       {/* Barra de busca e Botão Filtros */}
       <div className="search-bar-container">
         <div className="search-input-wrapper">
@@ -349,7 +362,7 @@ export const Dashboard = ({ user, addToast }) => {
           <input
             type="text"
             className="search-input"
-            placeholder="Buscar filmes e séries no TMDB..."
+            placeholder="Search"
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
@@ -361,17 +374,14 @@ export const Dashboard = ({ user, addToast }) => {
             >✕</button>
           )}
         </div>
-
-        {!isSearching && (
-          <button
-            className={`filter-toggle-btn ${showFilters ? 'active' : ''}`}
+        <div className="search-right-control">
+          <SlidersHorizontal 
+            size={18} 
+            className={`search-filter-icon ${showFilters ? 'active' : ''}`}
             onClick={() => setShowFilters(!showFilters)}
             title="Filtros avançados"
-          >
-            <SlidersHorizontal size={18} />
-            <span>Filtros</span>
-          </button>
-        )}
+          />
+        </div>
       </div>
 
       {/* Painel de Filtros Avançados */}

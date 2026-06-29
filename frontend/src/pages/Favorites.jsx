@@ -84,13 +84,11 @@ export const Favorites = ({ user, addToast }) => {
       <h2 style={{
         marginBottom: '2rem',
         fontFamily: 'var(--font-title)',
-        fontSize: '1.8rem',
-        background: 'linear-gradient(135deg, var(--text-primary) 30%, var(--accent) 100%)',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        display: 'inline-block',
+        fontSize: '2rem',
+        fontWeight: '800',
+        color: 'var(--text-primary)',
       }}>
-        Biblioteca de Favoritos
+        Meus Ingressos
       </h2>
 
       {loading ? (
@@ -105,16 +103,67 @@ export const Favorites = ({ user, addToast }) => {
           <p>Explore o catálogo e clique no ❤️ para salvar filmes e séries aqui!</p>
         </div>
       ) : (
-        <div className="movies-grid">
-          {favorites.map(fav => (
-            <MovieCard
-              key={fav.favId}
-              movie={fav.movie}
-              isFavorite={true}
-              onToggleFavorite={() => handleRemoveFavorite(fav.movie_id)}
-              onClick={() => setSelectedMovie(fav.movie)}
-            />
-          ))}
+        <div className="tickets-list">
+          {favorites.map(fav => {
+            const movie = fav.movie;
+            const year = movie.release_date ? movie.release_date.split('-')[0] : null;
+            const isTV = movie.media_type === 'tv';
+            return (
+              <div 
+                key={fav.favId} 
+                className="ticket-card"
+                onClick={() => setSelectedMovie(movie)}
+              >
+                {/* Poster do Ingresso */}
+                <img
+                  src={movie.poster_url || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=500&auto=format&fit=crop'}
+                  alt={movie.title}
+                  className="ticket-card-poster"
+                  onError={e => {
+                    e.target.src = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=500&auto=format&fit=crop';
+                  }}
+                />
+
+                {/* Detalhes do Ingresso */}
+                <div className="ticket-card-details">
+                  <div>
+                    <h3 className="ticket-card-title">{movie.title}</h3>
+                    <span className="ticket-card-genre">{movie.genre || (isTV ? 'Série' : 'Filme')}</span>
+                  </div>
+
+                  <div className="ticket-card-meta">
+                    <div className="ticket-card-rating-group">
+                      <div className="ticket-card-rating">
+                        <Heart size={12} style={{ fill: 'var(--accent)', color: 'var(--accent)' }} />
+                        <span>{movie.average_rating > 0 ? Number(movie.average_rating).toFixed(1) : (movie.tmdb_rating ? Number(movie.tmdb_rating).toFixed(1) : '0.0')}</span>
+                      </div>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>•</span>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{year || 'N/A'}</span>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                      {movie.tmdb_rating && Number(movie.tmdb_rating) > 0 && (
+                        <span className="badge-imdb-rating">
+                          TMDB {Number(movie.tmdb_rating).toFixed(1)}
+                        </span>
+                      )}
+
+                      <button
+                        className="ticket-card-fav-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveFavorite(fav.movie_id);
+                        }}
+                        title="Remover dos favoritos"
+                      >
+                        <Heart size={18} style={{ fill: 'var(--danger)' }} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 

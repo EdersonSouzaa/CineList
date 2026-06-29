@@ -7,40 +7,39 @@
   --font-title: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
 
-  /* HSL Colors */
-  --bg-base: hsl(225, 25%, 8%);
-  --bg-surface: hsl(223, 22%, 12%);
-  --bg-surface-hover: hsl(223, 20%, 16%);
+  /* Cores do Tema CineList Premium */
+  --bg-base: #08090f;                     /* Fundo preto azulado rico */
+  --bg-surface: #11131c;                  /* Painéis e cards cinza azulados */
+  --bg-surface-hover: #171a27;            /* Painéis e cards em hover */
   
-  --primary: hsl(263, 85%, 65%);          /* Roxo vibrante */
-  --primary-hover: hsl(263, 85%, 72%);
-  --primary-glow: rgba(139, 92, 246, 0.25);
-
-  --accent: hsl(190, 95%, 50%);           /* Cyan neon */
-  --accent-hover: hsl(190, 95%, 45%);
-  --accent-glow: rgba(6, 182, 212, 0.25);
-
-  --danger: hsl(342, 90%, 55%);           /* Coral / Rosa Neon */
-  --danger-hover: hsl(342, 90%, 65%);
-  --success: hsl(142, 70%, 45%);          /* Verde Esmeralda */
-  --warning: hsl(45, 95%, 50%);           /* Amarelo Ouro */
-
-  /* Text & Borders */
-  --text-primary: hsl(0, 0%, 98%);
-  --text-secondary: hsl(215, 20%, 75%);
-  --text-muted: hsl(215, 12%, 50%);
+  --primary: #ffffff;
+  --primary-hover: #f0f0f0;
   
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-glow: rgba(255, 255, 255, 0.12);
+  --accent: #ffb800;                      /* Amarelo Ouro / Dourado para ratings e destaques */
+  --accent-hover: #e0a200;
+  --accent-glow: rgba(255, 184, 0, 0.15);
 
-  /* Glassmorphism */
-  --glass-bg: rgba(11, 16, 29, 0.82);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-blur: blur(16px);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --danger: #ff3b30;                      /* Vermelho Apple */
+  --danger-hover: #e03228;
+  --success: #34c759;                     /* Verde Esmeralda */
+  --warning: #ffb800;                     /* Amarelo Ouro */
 
-  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-bounce: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Textos e Bordas */
+  --text-primary: #ffffff;
+  --text-secondary: #787d96;              /* Cinza médio suave */
+  --text-muted: #4a4e69;                  /* Cinza escuro para placeholder */
+  
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-glow: rgba(255, 255, 255, 0.09);
+
+  /* Sombras e Transições */
+  --glass-bg: rgba(17, 19, 28, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-blur: blur(12px);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+
+  --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* ==========================================================================
@@ -284,51 +283,65 @@ button, input, textarea {
 
 .movies-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.8rem;
+  grid-auto-rows: 1fr;
 }
 
 .movie-card {
   position: relative;
-  border-radius: 16px;
+  border-radius: 20px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   cursor: pointer;
   transition: var(--transition-bounce);
-  height: 380px;
+  height: 100%;
+  min-height: 310px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
 }
 
 .movie-card:hover {
-  transform: translateY(-8px);
-  border-color: var(--primary);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5), 0 0 15px var(--primary-glow);
+  transform: translateY(-6px);
+  border-color: var(--accent);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45), 0 0 20px var(--accent-glow);
 }
 
 .movie-card-poster {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 250px;
+  height: 100%;
   object-fit: cover;
+  z-index: 1;
   transition: var(--transition-smooth);
 }
 
 .movie-card:hover .movie-card-poster {
-  transform: scale(1.05);
+  transform: scale(1.06);
 }
 
 .movie-card-info {
-  padding: 1.2rem;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 2.5rem 1.2rem 1.2rem 1.2rem;
+  background: linear-gradient(to top, rgba(8, 9, 15, 0.96) 0%, rgba(8, 9, 15, 0.7) 60%, rgba(8, 9, 15, 0.3) 85%, transparent 100%);
+  z-index: 2;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  flex: 1;
-  background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.4));
+  gap: 0.3rem;
 }
 
 .movie-title {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-family: var(--font-title);
   color: var(--text-primary);
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.2rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -338,22 +351,27 @@ button, input, textarea {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--text-secondary);
+  margin-top: 0.2rem;
 }
 
 .movie-genre {
-  background: rgba(255, 255, 255, 0.06);
-  padding: 0.2rem 0.6rem;
-  border-radius: 6px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .movie-rating {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
-  color: var(--warning);
-  font-weight: 600;
+  gap: 0.25rem;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.8rem;
 }
 
 /* Botão Favoritar no Card */
@@ -1732,18 +1750,316 @@ button, input, textarea {
   100% { transform: scale(1); }
 }
 
-/* Correção de performance e glitch gráfico (removendo blur de múltiplos painéis pequenos) */
-.movie-card {
-  background: var(--bg-surface) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  transition: var(--transition-bounce) !important;
+/* ==========================================================================
+   UI REDESIGN: NOVO DESIGN SYSTEM DE CINEMA (MOCKUP INSPIRADO)
+   ========================================================================== */
+
+/* Cabeçalho do Dashboard: Olá Afshin + Avatar */
+.dashboard-user-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  width: 100%;
 }
 
-.movie-card:hover {
-  background: var(--bg-surface-hover) !important;
-  transform: translateY(-5px) !important;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4) !important;
+.dashboard-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.dashboard-greeting {
+  font-size: 1.6rem;
+  font-weight: 800;
+  font-family: var(--font-title);
+  color: var(--text-primary);
+}
+
+.dashboard-subgreeting {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.dashboard-user-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(255, 184, 0, 0.2);
+}
+
+.dashboard-user-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.nav-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  background: rgba(255, 184, 0, 0.15);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Novo Search Input em Pílula */
+.search-bar-container {
+  display: flex;
+  align-items: center;
+  background: #151722 !important;
+  border-radius: 26px !important;
+  height: 52px;
+  padding: 0 1.2rem !important;
+  border: 1px solid rgba(255, 255, 255, 0.04) !important;
+  margin-bottom: 2.2rem !important;
+  width: 100%;
+  gap: 0.8rem;
+}
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 0.8rem;
+}
+
+.search-icon {
+  color: var(--text-secondary);
+  position: static !important;
+  transform: none !important;
+}
+
+.search-input {
+  background: transparent !important;
+  border: none !important;
+  height: 100% !important;
+  padding: 0 !important;
+  font-size: 0.95rem !important;
+  color: var(--text-primary) !important;
+  width: 100%;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-right-control {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  padding-left: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.search-filter-icon {
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.search-filter-icon:hover {
+  color: var(--accent);
+}
+
+/* Abas de categoria e botões tipo Switcher */
+.catalog-tabs {
+  gap: 0.8rem !important;
+  margin-bottom: 2rem !important;
+}
+
+.catalog-tab, .random-select-btn {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 12px !important;
+  padding: 0.6rem 1.2rem !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  color: var(--text-secondary) !important;
+  transition: var(--transition-smooth) !important;
+}
+
+.catalog-tab:hover, .random-select-btn:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: var(--text-primary) !important;
+}
+
+.catalog-tab.active {
+  background: var(--bg-surface) !important;
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+  box-shadow: 0 4px 15px rgba(255, 184, 0, 0.1) !important;
+}
+
+/* Novo Badge IMDB/TMDB e Classificação nos Cards */
+.badge-imdb-rating {
+  background: var(--accent) !important;
+  color: #08090f !important;
+  font-size: 0.68rem !important;
+  font-weight: 800 !important;
+  padding: 0.25rem 0.5rem !important;
+  border-radius: 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.badge-type-overlay {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.3rem 0.6rem;
+  border-radius: 8px;
+  background: rgba(11, 13, 20, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.badge-type-overlay.badge-tv {
+  color: #34c759;
+}
+
+.badge-type-overlay.badge-movie {
+  color: var(--accent);
+}
+
+/* Cards de Ticket (Favorites Page) */
+.tickets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  width: 100%;
+}
+
+.ticket-card {
+  position: relative;
+  display: flex;
+  background: #11131c !important;
+  border-radius: 18px;
+  overflow: hidden;
+  height: 125px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  transition: var(--transition-bounce);
+}
+
+.ticket-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent);
+  box-shadow: 0 8px 24px rgba(255, 184, 0, 0.08);
+}
+
+.ticket-card::before, .ticket-card::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background-color: var(--bg-base); /* Mesma cor do fundo da página */
+  border-radius: 50%;
+  z-index: 5;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Posiciona os recortes na junção da foto (90px) com o texto */
+.ticket-card::before {
+  top: -8px;
+  left: 82px;
+}
+
+.ticket-card::after {
+  bottom: -8px;
+  left: 82px;
+}
+
+.ticket-card-poster {
+  width: 90px;
+  height: 100%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border-right: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.ticket-card-details {
+  flex: 1;
+  padding: 1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.ticket-card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-family: var(--font-title);
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 0.1rem;
+}
+
+.ticket-card-genre {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ticket-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.4rem;
+}
+
+.ticket-card-rating-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.ticket-card-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.ticket-card-fav-btn {
+  background: transparent;
+  border: none;
+  color: var(--danger);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem;
+  border-radius: 50%;
+  transition: var(--transition-smooth);
+}
+
+.ticket-card-fav-btn:hover {
+  background: rgba(255, 59, 48, 0.1);
+  transform: scale(1.15);
 }
 
 /* ==========================================================================
