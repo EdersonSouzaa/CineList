@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Sun, Moon, Globe, ShieldAlert, Download, Info, Check, Loader2, RefreshCw } from 'lucide-react';
+import { User, Sun, Moon, Globe, ShieldAlert, Download, Info, Check, Loader2, RefreshCw, Mail } from 'lucide-react';
 import { supabase } from '../services/supabase.js';
 
 // Função para aplicar a cor do tema dinamicamente no documento
@@ -178,19 +178,26 @@ export const Settings = ({ user, addToast }) => {
           <form onSubmit={handleUpdateProfile} className="settings-form" style={{ marginTop: '1.2rem' }}>
             <div className="form-group">
               <label className="form-label">E-mail (Leitura)</label>
-              <input type="text" className="form-input disabled" value={user?.email || ''} readOnly disabled />
+              <div style={{ position: 'relative' }}>
+                <Mail size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+                <input type="text" className="form-input disabled" value={user?.email || ''} readOnly disabled style={{ paddingLeft: '2.8rem' }} />
+              </div>
             </div>
             <div className="form-group">
               <label className="form-label" htmlFor="settings-username">Nome de Exibição</label>
-              <input
-                id="settings-username"
-                type="text"
-                className="form-input"
-                placeholder="Seu nome"
-                value={displayName}
-                onChange={e => setDisplayName(e.target.value)}
-                required
-              />
+              <div style={{ position: 'relative' }}>
+                <User size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+                <input
+                  id="settings-username"
+                  type="text"
+                  className="form-input"
+                  placeholder="Seu nome"
+                  value={displayName}
+                  onChange={e => setDisplayName(e.target.value)}
+                  required
+                  style={{ paddingLeft: '2.8rem' }}
+                />
+              </div>
             </div>
             <button type="submit" className="btn-primary" disabled={updatingProfile} style={{ width: 'auto', alignSelf: 'flex-start', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', height: '44px', padding: '0 1.5rem' }}>
               {updatingProfile ? (
@@ -274,30 +281,15 @@ export const Settings = ({ user, addToast }) => {
                 <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Filtro de Conteúdo Adulto (+18)</h4>
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Exibir filmes e produções adultas nas buscas e recomendações</p>
               </div>
-              <label className="toggle-switch" style={{ position: 'relative', display: 'inline-block', width: '46px', height: '24px', cursor: 'pointer' }}>
+              <label className="toggle-switch">
                 <input
                   type="checkbox"
+                  className="toggle-input"
                   checked={includeAdult}
                   onChange={handleAdultToggle}
-                  style={{ opacity: 0, width: 0, height: 0 }}
                 />
-                <span className="toggle-slider" style={{
-                  position: 'absolute',
-                  top: 0, left: 0, right: 0, bottom: 0,
-                  borderRadius: '34px',
-                  background: includeAdult ? 'var(--accent)' : 'rgba(255,255,255,0.08)',
-                  transition: '.3s'
-                }}>
-                  <span className="toggle-circle" style={{
-                    position: 'absolute',
-                    content: '""',
-                    height: '18px', width: '18px',
-                    left: includeAdult ? '24px' : '3px',
-                    bottom: '3px',
-                    borderRadius: '50%',
-                    background: includeAdult ? '#08090f' : 'var(--text-secondary)',
-                    transition: '.3s'
-                  }} />
+                <span className="toggle-slider">
+                  <span className="toggle-circle" />
                 </span>
               </label>
             </div>

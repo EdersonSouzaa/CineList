@@ -2548,13 +2548,68 @@ button, input, textarea {
   background: rgba(255, 255, 255, 0.04);
 }
 
-/* Toggle Switch Styles */
-.toggle-slider {
-  border: 1px solid rgba(255,255,255,0.05);
+/* Seletor Toggle Switch Premium */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+  cursor: pointer;
 }
 
-.toggle-slider:hover {
-  background: rgba(255,255,255,0.12);
+.toggle-input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 34px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-circle {
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Checked States */
+.toggle-input:checked + .toggle-slider {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.toggle-input:checked + .toggle-slider .toggle-circle {
+  transform: translateX(22px);
+  background: #08090f;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Hover States */
+.toggle-switch:hover .toggle-slider {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.toggle-switch:hover .toggle-input:checked + .toggle-slider {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
 }
 
 .btn-primary {
