@@ -1,11 +1,14 @@
-const CACHE_NAME = 'cinelist-cache-v4';
+const CACHE_NAME = 'cinelist-cache-v6';
 const ASSETS = [
   '/',
   '/index.html',
   '/favicon.png',
   '/pwa-192.png',
   '/pwa-512.png',
+  '/pwa-192-maskable.png',
+  '/pwa-512-maskable.png',
   '/apple-touch-icon.png',
+  '/apple-touch-icon-precomposed.png',
   '/manifest.json'
 ];
 
