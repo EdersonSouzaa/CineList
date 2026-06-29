@@ -2577,3 +2577,13 @@ button, input, textarea {
   }
 }
 
+/* Correção de espaçamento da tela de login sem a barra de navegação */
+.main-content.auth-mode {
+  padding-top: 2rem !important;
+  padding-bottom: 2rem !important;
+}
+
+.main-content.auth-mode .auth-container {
+  min-height: calc(100vh - 4rem) !important;
+}
+

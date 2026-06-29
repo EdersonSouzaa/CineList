@@ -67,15 +67,17 @@ function App() {
   return (
     <div className="app-container">
       {/* Barra de Navegação Superior */}
-      <Navbar 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
-        user={user} 
-        addToast={addToast} 
-      />
+      {user && (
+        <Navbar 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab} 
+          user={user} 
+          addToast={addToast} 
+        />
+      )}
 
       {/* Conteúdo Principal da Página */}
-      <main className="main-content">
+      <main className={`main-content ${!user ? 'auth-mode' : ''}`}>
         {!user ? (
           <Auth addToast={addToast} />
         ) : activeTab === 'catalog' ? (
