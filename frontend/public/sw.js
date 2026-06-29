@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cinelist-cache-v3';
+const CACHE_NAME = 'cinelist-cache-v4';
 const ASSETS = [
   '/',
   '/index.html',
@@ -71,7 +71,7 @@ self.addEventListener('fetch', (e) => {
           return networkResponse;
         })
         .catch(() => {
-          return caches.match(e.request);
+          return caches.match(e.request, { ignoreSearch: true });
         })
     );
     return;
@@ -79,7 +79,7 @@ self.addEventListener('fetch', (e) => {
 
   // Estratégia Cache-First para os outros ativos (favicon, manifest, etc.)
   e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
+    caches.match(e.request, { ignoreSearch: true }).then((cachedResponse) => {
       if (cachedResponse) {
         return cachedResponse;
       }
