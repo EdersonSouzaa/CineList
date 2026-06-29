@@ -88,7 +88,7 @@ export const Favorites = ({ user, addToast }) => {
         fontWeight: '800',
         color: 'var(--text-primary)',
       }}>
-        Meus Ingressos
+        Favoritos
       </h2>
 
       {loading ? (

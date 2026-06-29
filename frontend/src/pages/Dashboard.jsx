@@ -342,12 +342,14 @@ export const Dashboard = ({ user, addToast }) => {
       {/* Cabeçalho de Boas-vindas */}
       <div className="dashboard-user-header">
         <div className="dashboard-user-info">
-          <h2 className="dashboard-greeting">Hello {user?.email ? user.email.split('@')[0] : 'Cineast'}!</h2>
-          <span className="dashboard-subgreeting">Book your favorite movie</span>
+          <h2 className="dashboard-greeting">Olá {user?.user_metadata?.display_name || (user?.email ? user.email.split('@')[0] : 'Cineasta')}!</h2>
+          <span className="dashboard-subgreeting">Escolha seu filme favorito</span>
         </div>
         <div className="dashboard-user-avatar">
           <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--accent)' }}>
-            {user?.email ? user.email[0].toUpperCase() : 'U'}
+            {user?.user_metadata?.display_name 
+              ? user.user_metadata.display_name[0].toUpperCase() 
+              : (user?.email ? user.email[0].toUpperCase() : 'U')}
           </span>
         </div>
       </div>
