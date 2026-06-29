@@ -368,15 +368,13 @@ button, input, textarea {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(11, 16, 29, 0.9);
   border: 1px solid rgba(255,255,255,0.1);
   color: var(--text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   transition: var(--transition-bounce);
   z-index: 10;
 }
@@ -1908,17 +1906,26 @@ button, input, textarea {
   /* Grid de Filmes Adaptável (2 colunas em telas pequenas) */
   .movies-grid {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.6rem !important;
+    grid-auto-rows: 1fr !important; /* Faz todos os cards da mesma linha terem a mesma altura */
+    gap: 0.8rem !important;
   }
   .movie-card {
+    height: 100% !important;
+    min-height: 340px !important; /* Altura mínima garantida para evitar qualquer corte */
     border-radius: 12px !important;
-    height: 330px !important; /* Altura corrigida do card no mobile */
+    display: flex !important;
+    flex-direction: column !important;
   }
   .movie-card-poster {
-    height: 210px !important; /* Reduz altura do pôster no mobile para dar espaço ao texto */
+    height: 200px !important; /* Altura otimizada para o pôster */
+    flex-shrink: 0 !important;
   }
   .movie-card-info {
-    padding: 0.6rem !important; /* Reduz padding interno no mobile */
+    padding: 0.6rem !important;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
   }
   .movie-title {
     font-size: 0.9rem !important;
