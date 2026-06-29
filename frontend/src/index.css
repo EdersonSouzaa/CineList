@@ -59,10 +59,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
-  background-image: 
-    radial-gradient(at 10% 10%, rgba(139, 92, 246, 0.08) 0px, transparent 50%),
-    radial-gradient(at 90% 90%, rgba(6, 182, 212, 0.08) 0px, transparent 50%);
-  background-attachment: fixed;
   min-height: 100vh;
 }
 
@@ -1597,12 +1593,7 @@ button, input, textarea {
 /* ==========================================================================
    FEATURE 12: CHAMELEON UI (CORES DINÂMICAS)
    ========================================================================== */
-:root[style*="--chameleon-color"] body {
-  background-image: 
-    radial-gradient(at 50% 50%, rgba(var(--chameleon-color), 0.1) 0px, transparent 70%),
-    radial-gradient(at 10% 10%, rgba(var(--chameleon-color-accent), 0.06) 0px, transparent 50%),
-    radial-gradient(at 90% 90%, rgba(6, 182, 212, 0.04) 0px, transparent 50%);
-}
+/* Remoção do gradiente de background para evitar glitches gráficos */
 
 :root[style*="--chameleon-color"] .modal-content {
   box-shadow: 0 16px 48px rgba(var(--chameleon-color), 0.3),
@@ -1767,6 +1758,13 @@ button, input, textarea {
   body {
     background-image: none !important;
     background-color: #0b101d !important;
+  }
+
+  /* Previne rolagem horizontal da página no mobile */
+  html, body, .app-container {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   /* Desativa backdrop-filter globalmente no mobile para evitar glitches de renderização da GPU */
