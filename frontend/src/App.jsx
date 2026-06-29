@@ -25,9 +25,9 @@ function App() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Inicializar o tema de cor salvo
+  // Inicializar o tema salvo (modo escuro ou claro)
   useEffect(() => {
-    const savedTheme = localStorage.getItem('cinelist_theme') || 'gold';
+    const savedTheme = localStorage.getItem('cinelist_theme') === 'light' ? 'light' : 'dark';
     applyThemeColor(savedTheme);
   }, []);
 

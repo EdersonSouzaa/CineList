@@ -41,6 +41,22 @@
   --transition-bounce: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+html.light-mode {
+  --bg-base: #f5f6fa;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f0f2f7;
+  --primary: #08090f;
+  --primary-hover: #11131c;
+  --text-primary: #08090f;
+  --text-secondary: #4e526b;
+  --text-muted: #9a9eb5;
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-glow: rgba(0, 0, 0, 0.04);
+  --glass-bg: #ffffff;
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-shadow: 0 8px 32px 0 rgba(8, 9, 15, 0.06);
+}
+
 /* ==========================================================================
    RESET E BASE
    ========================================================================== */

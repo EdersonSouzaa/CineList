@@ -1,37 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { User, Palette, Globe, ShieldAlert, Download, Info, Check, Loader2, RefreshCw } from 'lucide-react';
+import { User, Sun, Moon, Globe, ShieldAlert, Download, Info, Check, Loader2, RefreshCw } from 'lucide-react';
 import { supabase } from '../services/supabase.js';
 
 // Função para aplicar a cor do tema dinamicamente no documento
-export const applyThemeColor = (colorName) => {
-  const themes = {
-    gold: {
-      accent: '#ffb800',
-      accentHover: '#e0a200',
-      accentGlow: 'rgba(255, 184, 0, 0.15)',
-    },
-    cyan: {
-      accent: '#06b6d4',
-      accentHover: '#0891b2',
-      accentGlow: 'rgba(6, 182, 212, 0.15)',
-    },
-    red: {
-      accent: '#ff3b30',
-      accentHover: '#e03228',
-      accentGlow: 'rgba(255, 59, 48, 0.15)',
-    },
-    green: {
-      accent: '#34c759',
-      accentHover: '#28a745',
-      accentGlow: 'rgba(52, 199, 89, 0.15)',
-    }
-  };
-
-  const selected = themes[colorName] || themes.gold;
-  document.documentElement.style.setProperty('--accent', selected.accent);
-  document.documentElement.style.setProperty('--accent-hover', selected.accentHover);
-  document.documentElement.style.setProperty('--accent-glow', selected.accentGlow);
-  localStorage.setItem('cinelist_theme', colorName);
+export const applyThemeColor = (themeMode) => {
+  const isLight = themeMode === 'light';
+  if (isLight) {
+    document.documentElement.classList.add('light-mode');
+  } else {
+    document.documentElement.classList.remove('light-mode');
+  }
+  localStorage.setItem('cinelist_theme', themeMode);
 };
 
 export const Settings = ({ user, addToast }) => {
@@ -39,13 +18,14 @@ export const Settings = ({ user, addToast }) => {
   const [displayName, setDisplayName] = useState(user?.user_metadata?.display_name || '');
   const [updatingProfile, setUpdatingProfile] = useState(false);
 
-  // Configurações locais
-  const [theme, setTheme] = useState(localStorage.getItem('cinelist_theme') || 'gold');
+  // Configurações locais (modo claro/escuro)
+  const [theme, setTheme] = useState(localStorage.getItem('cinelist_theme') === 'light' ? 'light' : 'dark');
   const [language, setLanguage] = useState(localStorage.getItem('cinelist_language') || 'pt-BR');
   const [includeAdult, setIncludeAdult] = useState(localStorage.getItem('cinelist_include_adult') === 'true');
 
   // Estado de instalação do PWA
   const [installable, setInstallable] = useState(!!window.deferredPrompt);
+  const [showInstructions, setShowInstructions] = useState(false);
 
   useEffect(() => {
     const handleInstallable = () => {
@@ -78,10 +58,10 @@ export const Settings = ({ user, addToast }) => {
     }
   };
 
-  const handleThemeChange = (colorName) => {
-    setTheme(colorName);
-    applyThemeColor(colorName);
-    addToast('Cor do tema atualizada!', 'success');
+  const handleThemeChange = (mode) => {
+    setTheme(mode);
+    applyThemeColor(mode);
+    addToast(mode === 'light' ? 'Modo Claro ativado!' : 'Modo Escuro ativado!', 'success');
   };
 
   const handleLanguageChange = (e) => {
@@ -101,7 +81,13 @@ export const Settings = ({ user, addToast }) => {
   const handleInstallClick = async () => {
     const promptEvent = window.deferredPrompt;
     if (!promptEvent) {
-      addToast('Prompt de instalação não disponível no momento.', 'info');
+      setShowInstructions(prev => !prev);
+      const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      if (isiOS) {
+        addToast('Instruções de instalação para iOS exibidas abaixo.', 'info');
+      } else {
+        addToast('Instruções de instalação exibidas abaixo.', 'info');
+      }
       return;
     }
     promptEvent.prompt();
@@ -122,20 +108,62 @@ export const Settings = ({ user, addToast }) => {
 
       <div className="settings-sections">
         {/* Instalar App (PWA) */}
-        {installable && (
-          <div className="settings-card glass-panel highlight-border">
-            <div className="settings-card-header">
-              <Download size={22} style={{ color: 'var(--accent)' }} />
-              <div>
-                <h3>CineList no Celular</h3>
-                <p>Baixe o aplicativo para ter carregamento instantâneo e acesso offline!</p>
-              </div>
+        <div className="settings-card glass-panel highlight-border">
+          <div className="settings-card-header">
+            <Download size={22} style={{ color: 'var(--accent)' }} />
+            <div>
+              <h3>Instalar CineList (PWA)</h3>
+              <p>Baixe o aplicativo para ter carregamento instantâneo, ícone na tela inicial e acesso offline!</p>
             </div>
-            <button className="btn-primary btn-install-pwa" onClick={handleInstallClick} style={{ width: '100%', marginTop: '1rem', padding: '0.8rem' }}>
-              Instalar Aplicativo (PWA)
-            </button>
           </div>
-        )}
+          <button 
+            className="btn-primary btn-install-pwa" 
+            onClick={handleInstallClick} 
+            style={{ 
+              width: '100%', 
+              marginTop: '1rem', 
+              padding: '0.8rem', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              gap: '0.5rem',
+              cursor: 'pointer'
+            }}
+          >
+            <Download size={18} />
+            <span>Baixar Aplicativo (PWA)</span>
+          </button>
+
+          {showInstructions && (
+            <div className="pwa-instructions-banner" style={{
+              marginTop: '1.2rem',
+              padding: '1rem',
+              borderRadius: '12px',
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid var(--border-subtle)',
+              fontSize: '0.9rem',
+              animation: 'fadeIn 0.3s ease'
+            }}>
+              <h4 style={{ fontWeight: 600, marginBottom: '0.5rem', color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Info size={16} />
+                <span>Como instalar o aplicativo:</span>
+              </h4>
+              {/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream ? (
+                <ol style={{ paddingLeft: '1.2rem', margin: 0, display: 'flex', flexDirection: 'column', gap: '0.4rem', color: 'var(--text-secondary)' }}>
+                  <li>Toque no botão de <strong>Compartilhar</strong> <span role="img" aria-label="share">📤</span> no menu inferior do Safari.</li>
+                  <li>Desça a lista de opções e clique em <strong>Adicionar à Tela de Início</strong> <span role="img" aria-label="add to home">➕</span>.</li>
+                  <li>Toque em <strong>Adicionar</strong> no canto superior direito para confirmar.</li>
+                </ol>
+              ) : (
+                <ol style={{ paddingLeft: '1.2rem', margin: 0, display: 'flex', flexDirection: 'column', gap: '0.4rem', color: 'var(--text-secondary)' }}>
+                  <li>Abra as configurações do seu navegador (ícone de <strong>três pontos</strong> <span role="img" aria-label="menu">⋮</span>).</li>
+                  <li>Selecione a opção <strong>Instalar Aplicativo</strong> ou <strong>Adicionar à tela inicial</strong>.</li>
+                  <li>Siga as instruções na tela para concluir a instalação.</li>
+                </ol>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Perfil */}
         <div className="settings-card glass-panel">
@@ -176,45 +204,46 @@ export const Settings = ({ user, addToast }) => {
           </form>
         </div>
 
-        {/* Aparência */}
+        {/* Tema do CineList */}
         <div className="settings-card glass-panel">
           <div className="settings-card-header">
-            <Palette size={22} style={{ color: 'var(--accent)' }} />
+            <Sun size={22} style={{ color: 'var(--accent)' }} />
             <div>
-              <h3>Aparência do CineList</h3>
-              <p>Personalize a cor de destaque da interface</p>
+              <h3>Tema do CineList</h3>
+              <p>Selecione o modo de visualização preferido</p>
             </div>
           </div>
           <div className="theme-selectors" style={{ display: 'flex', gap: '1rem', marginTop: '1.2rem', flexWrap: 'wrap' }}>
             {[
-              { id: 'gold', name: 'Dourado', color: '#ffb800' },
-              { id: 'cyan', name: 'Ciano', color: '#06b6d4' },
-              { id: 'red', name: 'Vermelho', color: '#ff3b30' },
-              { id: 'green', name: 'Verde', color: '#34c759' }
-            ].map(item => (
-              <button
-                key={item.id}
-                onClick={() => handleThemeChange(item.id)}
-                className={`theme-color-option ${theme === item.id ? 'active' : ''}`}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  padding: '0.75rem 1.2rem',
-                  borderRadius: '12px',
-                  border: theme === item.id ? '2px solid var(--accent)' : '1px solid var(--border-subtle)',
-                  background: theme === item.id ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.01)',
-                  color: 'var(--text-primary)',
-                  cursor: 'pointer',
-                  fontWeight: 500,
-                  transition: 'var(--transition-smooth)'
-                }}
-              >
-                <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: item.color, display: 'inline-block' }} />
-                <span>{item.name}</span>
-                {theme === item.id && <Check size={14} style={{ color: 'var(--accent)' }} />}
-              </button>
-            ))}
+              { id: 'dark', name: 'Modo Escuro', icon: Moon },
+              { id: 'light', name: 'Modo Claro', icon: Sun }
+            ].map(item => {
+              const IconComponent = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleThemeChange(item.id)}
+                  className={`theme-color-option ${theme === item.id ? 'active' : ''}`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.6rem',
+                    padding: '0.75rem 1.5rem',
+                    borderRadius: '12px',
+                    border: theme === item.id ? '2px solid var(--accent)' : '1px solid var(--border-subtle)',
+                    background: theme === item.id ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.01)',
+                    color: 'var(--text-primary)',
+                    cursor: 'pointer',
+                    fontWeight: 500,
+                    transition: 'var(--transition-smooth)'
+                  }}
+                >
+                  <IconComponent size={16} style={{ color: theme === item.id ? 'var(--accent)' : 'var(--text-secondary)' }} />
+                  <span>{item.name}</span>
+                  {theme === item.id && <Check size={14} style={{ color: 'var(--accent)' }} />}
+                </button>
+              );
+            })}
           </div>
         </div>
 
