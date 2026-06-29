@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { User, Star, Heart, MessageSquare, Film, Calendar } from 'lucide-react';
+import { User, Star, Heart, MessageSquare, Film, Calendar, Settings as SettingsIcon } from 'lucide-react';
 import { api } from '../services/api.js';
 import { getDetails } from '../services/tmdb.js';
 import MovieDetailsModal from '../components/MovieDetailsModal.jsx';
 
-export const Profile = ({ user, addToast }) => {
+export const Profile = ({ user, addToast, setActiveTab }) => {
   const [reviews, setReviews] = useState([]);
   const [favCount, setFavCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -95,7 +95,31 @@ export const Profile = ({ user, addToast }) => {
   return (
     <div className="profile-container">
       {/* Card de Informações Principais */}
-      <div className="profile-card">
+      <div className="profile-card" style={{ position: 'relative' }}>
+        <button
+          onClick={() => setActiveTab('settings')}
+          title="Configurações"
+          className="profile-settings-btn"
+          style={{
+            position: 'absolute',
+            top: '1.25rem',
+            right: '1.25rem',
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid var(--border-subtle)',
+            color: 'var(--text-secondary)',
+            width: '38px',
+            height: '38px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'var(--transition-smooth)',
+            zIndex: 10
+          }}
+        >
+          <SettingsIcon size={18} />
+        </button>
         <div className="profile-header">
           <div className="profile-avatar-large">
             {userInitial}

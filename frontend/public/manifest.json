@@ -1,0 +1,22 @@
+{
+  "short_name": "CineList",
+  "name": "CineList - Catálogo e Biblioteca de Filmes",
+  "description": "Seu catálogo de filmes pessoal. Avalie com notas e comentários, favorite e organize a sua própria biblioteca de filmes.",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/favicon.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#08090f",
+  "theme_color": "#ffb800",
+  "display": "standalone",
+  "orientation": "portrait"
+}

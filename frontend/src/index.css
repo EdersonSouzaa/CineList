@@ -2171,7 +2171,7 @@ button, input, textarea {
     font-size: 0.72rem !important;
     font-weight: 500 !important;
     cursor: pointer !important;
-    width: 25% !important;
+    width: 20% !important;
     height: 100% !important;
   }
 
@@ -2441,6 +2441,139 @@ button, input, textarea {
   
   .auth-logo {
     font-size: 2.2rem !important;
+  }
+}
+
+/* ==========================================================================
+   TELA DE CONFIGURAÇÕES (SETTINGS)
+   ========================================================================== */
+.settings-container {
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.settings-page-title {
+  font-size: 2.2rem;
+  margin-bottom: 2.5rem;
+  font-family: var(--font-title);
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.settings-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+}
+
+.settings-card {
+  padding: 2rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition-smooth);
+}
+
+.settings-card.highlight-border {
+  border: 1px solid rgba(255, 184, 0, 0.35);
+  box-shadow: 0 4px 24px rgba(255, 184, 0, 0.06);
+}
+
+.settings-card-header {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.settings-card-header h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+  font-family: var(--font-title);
+}
+
+.settings-card-header p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.theme-color-option {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.2rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.01);
+  color: var(--text-primary);
+  font-weight: 500;
+  transition: var(--transition-smooth);
+}
+
+.theme-color-option:hover {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.theme-color-option.active {
+  border: 2px solid var(--accent);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Toggle Switch Styles */
+.toggle-slider {
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.toggle-slider:hover {
+  background: rgba(255,255,255,0.12);
+}
+
+/* PWA Install Button */
+.btn-install-pwa {
+  animation: pwa-pulse-glow 2s infinite ease-in-out;
+}
+
+@keyframes pwa-pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(255, 184, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 184, 0, 0.45);
+  }
+}
+
+/* Mobile Settings Customizations */
+@media (max-width: 768px) {
+  .settings-card {
+    padding: 1.5rem 1.2rem !important;
+    border-radius: 16px !important;
+  }
+  
+  .settings-page-title {
+    font-size: 1.8rem !important;
+    margin-bottom: 1.8rem !important;
+  }
+
+  .theme-selectors {
+    gap: 0.6rem !important;
+  }
+
+  .theme-color-option {
+    padding: 0.6rem 0.9rem !important;
+    font-size: 0.85rem !important;
   }
 }
 

@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard.jsx';
 import Favorites from './pages/Favorites.jsx';
 import Profile from './pages/Profile.jsx';
 import CineQuiz from './pages/CineQuiz.jsx';
+import Settings, { applyThemeColor } from './pages/Settings.jsx';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -23,6 +24,12 @@ function App() {
   const removeToast = (id) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
+
+  // Inicializar o tema de cor salvo
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('cinelist_theme') || 'gold';
+    applyThemeColor(savedTheme);
+  }, []);
 
   // Monitorar autenticação do Supabase
   useEffect(() => {
@@ -77,8 +84,10 @@ function App() {
           <Favorites user={user} addToast={addToast} />
         ) : activeTab === 'quiz' ? (
           <CineQuiz user={user} addToast={addToast} />
+        ) : activeTab === 'settings' ? (
+          <Settings user={user} addToast={addToast} />
         ) : (
-          <Profile user={user} addToast={addToast} />
+          <Profile user={user} addToast={addToast} setActiveTab={setActiveTab} />
         )}
       </main>
 

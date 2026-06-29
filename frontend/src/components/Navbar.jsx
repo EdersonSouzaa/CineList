@@ -1,5 +1,5 @@
 import React from 'react';
-import { Film, Heart, LogOut, User, Gamepad2 } from 'lucide-react';
+import { Film, Heart, LogOut, User, Gamepad2, Settings as SettingsIcon } from 'lucide-react';
 import { supabase } from '../services/supabase.js';
 import iconeApp from '../assets/app_icone.png';
 
@@ -58,6 +58,14 @@ export const Navbar = ({ activeTab, setActiveTab, user, addToast }) => {
                 <User size={18} />
                 <span>Perfil</span>
               </button>
+              <button 
+                className={`nav-link ${activeTab === 'settings' ? 'active' : ''}`}
+                onClick={() => setActiveTab('settings')}
+                style={{ background: 'transparent', border: 'none' }}
+              >
+                <SettingsIcon size={18} />
+                <span>Configurações</span>
+              </button>
             </div>
 
             {/* Controle de usuário exclusivo para Desktop */}
@@ -114,6 +122,13 @@ export const Navbar = ({ activeTab, setActiveTab, user, addToast }) => {
           >
             <User size={20} />
             <span>Perfil</span>
+          </button>
+          <button 
+            className={`bottom-nav-link ${activeTab === 'settings' ? 'active' : ''}`}
+            onClick={() => setActiveTab('settings')}
+          >
+            <SettingsIcon size={20} />
+            <span>Ajustes</span>
           </button>
         </div>
       )}
