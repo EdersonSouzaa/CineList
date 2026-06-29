@@ -2183,17 +2183,14 @@ button, input, textarea {
 
   /* Dashboard, Busca e Filtros */
   .search-bar-container {
-    flex-direction: column !important;
-    gap: 0.8rem !important;
+    flex-direction: row !important;
     width: 100% !important;
+    height: 52px !important;
+    align-items: center !important;
   }
   .search-input-wrapper {
-    width: 100% !important;
-  }
-  .filter-toggle-btn {
-    width: 100% !important;
-    justify-content: center !important;
-    height: 48px !important;
+    width: auto !important;
+    flex: 1 !important;
   }
 
   /* Abas do catálogo com rolagem horizontal (Estilo Netflix) */
