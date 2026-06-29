@@ -1773,6 +1773,19 @@ button, input, textarea {
     -webkit-backdrop-filter: none !important;
   }
 
+  /* Desativa transições, transformações e efeitos de hover no mobile para evitar smearing/fantasmas na rolagem */
+  .movie-card, 
+  .movie-card:hover, 
+  .movie-card-poster, 
+  .movie-card:hover .movie-card-poster, 
+  .btn-fav-card, 
+  .btn-fav-card:hover,
+  .glass-panel {
+    transform: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+  }
+
   /* Aplica cores de fundo sólidas e escuras nos painéis para compensar a perda do desfoque */
   .glass-panel, .navbar, .mobile-bottom-nav, .modal-content, .filters-panel {
     background: rgba(11, 16, 29, 0.97) !important;
