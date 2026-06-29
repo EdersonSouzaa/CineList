@@ -23,9 +23,10 @@ export const Settings = ({ user, addToast }) => {
   const [language, setLanguage] = useState(localStorage.getItem('cinelist_language') || 'pt-BR');
   const [includeAdult, setIncludeAdult] = useState(localStorage.getItem('cinelist_include_adult') === 'true');
 
-  // Estado de instalação do PWA
+  // Estado de instalação do PWA e Modais
   const [installable, setInstallable] = useState(!!window.deferredPrompt);
   const [showInstructions, setShowInstructions] = useState(false);
+  const [showAboutModal, setShowAboutModal] = useState(false);
 
   useEffect(() => {
     const handleInstallable = () => {
@@ -191,7 +192,7 @@ export const Settings = ({ user, addToast }) => {
                 required
               />
             </div>
-            <button type="submit" className="btn-submit-review" disabled={updatingProfile} style={{ width: 'auto', alignSelf: 'flex-start', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <button type="submit" className="btn-primary" disabled={updatingProfile} style={{ width: 'auto', alignSelf: 'flex-start', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', height: '44px', padding: '0 1.5rem' }}>
               {updatingProfile ? (
                 <>
                   <Loader2 className="spinner" size={16} />
@@ -316,9 +317,128 @@ export const Settings = ({ user, addToast }) => {
             <p><strong>CineList v2.0.0 (PWA)</strong></p>
             <p>Seu assistente pessoal e catálogo de cinema moderno. Salve seus filmes preferidos, avalie produções da comunidade, descubra streaming oficial e teste seus conhecimentos com o CineQuiz!</p>
             <p style={{ marginTop: '0.8rem', color: 'var(--text-muted)' }}>Desenvolvido com React + Supabase + OpenStreetMap + TMDB API.</p>
+            
+            <button 
+              type="button" 
+              onClick={() => setShowAboutModal(true)} 
+              className="theme-color-option"
+              style={{ 
+                marginTop: '1.2rem', 
+                width: '100%', 
+                justifyContent: 'center', 
+                fontWeight: 600, 
+                border: '1px solid var(--accent)',
+                color: 'var(--accent)',
+                background: 'transparent'
+              }}
+            >
+              Ver Objetivo do Sistema &amp; Detalhes
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Modal Sobre o CineList (Aba Objetivo do Sistema) */}
+      {showAboutModal && (
+        <div className="modal-overlay" onClick={() => setShowAboutModal(false)}>
+          <div className="modal-content glass-panel" onClick={e => e.stopPropagation()} style={{ maxWidth: '600px', padding: '2.5rem' }}>
+            <button className="btn-close-modal" onClick={() => setShowAboutModal(false)}>✕</button>
+            
+            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+              <div style={{
+                background: 'var(--accent-glow)',
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 1rem auto'
+              }}>
+                <Info size={32} style={{ color: 'var(--accent)' }} />
+              </div>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 800, fontFamily: 'var(--font-title)', color: 'var(--text-primary)' }}>CineList</h2>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.2rem' }}>Versão 2.0.0 (PWA)</p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', color: 'var(--text-primary)', lineHeight: '1.6' }}>
+              <div>
+                <h4 style={{ color: 'var(--accent)', fontWeight: 700, fontSize: '1.05rem', marginBottom: '0.4rem', fontFamily: 'var(--font-title)' }}>
+                  Objetivo do Sistema
+                </h4>
+                <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
+                  O CineList foi concebido para ser a sua <strong>biblioteca de cinema definitiva e pessoal</strong>. Nossa missão é oferecer um espaço prático, rápido e imersivo para organizar as produções que você já assistiu ou deseja assistir, permitindo classificar com notas, escrever resenhas e compartilhar suas impressões com a comunidade.
+                </p>
+              </div>
+
+              <div>
+                <h4 style={{ color: 'var(--accent)', fontWeight: 700, fontSize: '1.05rem', marginBottom: '0.4rem', fontFamily: 'var(--font-title)' }}>
+                  Principais Funcionalidades
+                </h4>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                  <li style={{ display: 'flex', gap: '0.6rem', fontSize: '0.9rem' }}>
+                    <span>🎬</span>
+                    <div>
+                      <strong style={{ color: 'var(--text-primary)' }}>Catálogo Completo:</strong>
+                      <span style={{ color: 'var(--text-secondary)' }}> Explore e busque milhares de filmes com dados em tempo real via TMDB.</span>
+                    </div>
+                  </li>
+                  <li style={{ display: 'flex', gap: '0.6rem', fontSize: '0.9rem' }}>
+                    <span>⭐</span>
+                    <div>
+                      <strong style={{ color: 'var(--text-primary)' }}>Comunidade e Notas:</strong>
+                      <span style={{ color: 'var(--text-secondary)' }}> Favorite, avalie e comente sobre filmes, ajudando e interagindo com outros cinéfilos.</span>
+                    </div>
+                  </li>
+                  <li style={{ display: 'flex', gap: '0.6rem', fontSize: '0.9rem' }}>
+                    <span>📍</span>
+                    <div>
+                      <strong style={{ color: 'var(--text-primary)' }}>Cinemas ao Redor:</strong>
+                      <span style={{ color: 'var(--text-secondary)' }}> Use mapas dinâmicos e geolocalização para encontrar cinemas e salas de exibição perto de você.</span>
+                    </div>
+                  </li>
+                  <li style={{ display: 'flex', gap: '0.6rem', fontSize: '0.9rem' }}>
+                    <span>🏆</span>
+                    <div>
+                      <strong style={{ color: 'var(--text-primary)' }}>CineQuiz:</strong>
+                      <span style={{ color: 'var(--text-secondary)' }}> Divirta-se jogando um quiz sobre curiosidades do cinema e dispute melhores pontuações.</span>
+                    </div>
+                  </li>
+                  <li style={{ display: 'flex', gap: '0.6rem', fontSize: '0.9rem' }}>
+                    <span>📲</span>
+                    <div>
+                      <strong style={{ color: 'var(--text-primary)' }}>PWA (Web Mobile):</strong>
+                      <span style={{ color: 'var(--text-secondary)' }}> Instale o app no celular para usufruir de carregamento offline instantâneo.</span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              <div style={{
+                borderTop: '1px solid var(--border-subtle)',
+                paddingTop: '1.2rem',
+                fontSize: '0.85rem',
+                color: 'var(--text-secondary)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '0.5rem'
+              }}>
+                <span><strong>Desenvolvimento:</strong> React + Supabase</span>
+                <span><strong>APIs:</strong> TMDB &amp; OpenStreetMap</span>
+              </div>
+            </div>
+            
+            <button 
+              className="btn-primary" 
+              onClick={() => setShowAboutModal(false)} 
+              style={{ width: '100%', marginTop: '2rem', height: '44px', cursor: 'pointer' }}
+            >
+              Fechar Detalhes
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
