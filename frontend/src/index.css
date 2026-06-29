@@ -2083,22 +2083,28 @@ button, input, textarea {
     max-width: 100% !important;
   }
 
-  /* Desativa backdrop-filter globalmente no mobile para evitar glitches de renderização da GPU */
+  /* Desativa backdrop-filter e transições globalmente no mobile para evitar glitches e smearing de renderização da GPU */
   *, *::before, *::after {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+    transition: none !important;
   }
 
-  /* Desativa transições, transformações e efeitos de hover no mobile para evitar smearing/fantasmas na rolagem */
+  /* Desativa transformações e efeitos de hover no mobile para evitar smearing/fantasmas na rolagem */
   .movie-card, 
   .movie-card:hover, 
   .movie-card-poster, 
   .movie-card:hover .movie-card-poster, 
   .btn-fav-card, 
   .btn-fav-card:hover,
-  .glass-panel {
+  .glass-panel,
+  .catalog-tab,
+  .catalog-tab:hover,
+  .random-select-btn,
+  .random-select-btn:hover,
+  .ticket-card,
+  .ticket-card:hover {
     transform: none !important;
-    transition: none !important;
     box-shadow: none !important;
   }
 
@@ -2223,22 +2229,11 @@ button, input, textarea {
     gap: 0.8rem !important;
   }
   .movie-card {
-    height: 100% !important;
-    min-height: 340px !important; /* Altura mínima garantida para evitar qualquer corte */
-    border-radius: 12px !important;
-    display: flex !important;
-    flex-direction: column !important;
-  }
-  .movie-card-poster {
-    height: 200px !important; /* Altura otimizada para o pôster */
-    flex-shrink: 0 !important;
+    min-height: 270px !important;
+    border-radius: 14px !important;
   }
   .movie-card-info {
-    padding: 0.6rem !important;
-    flex: 1 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-between !important;
+    padding: 1.5rem 0.8rem 0.8rem 0.8rem !important;
   }
   .movie-title {
     font-size: 0.9rem !important;
