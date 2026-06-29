@@ -1787,90 +1787,76 @@ button, input, textarea {
   }
 
   /* Aplica cores de fundo sólidas e escuras nos painéis para compensar a perda do desfoque */
-  .glass-panel, .navbar, .mobile-bottom-nav, .modal-content, .filters-panel {
+  .glass-panel, .navbar, .modal-content, .filters-panel {
     background: rgba(11, 16, 29, 0.97) !important;
     border-color: rgba(255, 255, 255, 0.08) !important;
   }
 
   /* Layout Global */
   .main-content {
-    padding: 95px 1rem 90px 1rem !important; /* Mais espaço abaixo para não cobrir com o bottom nav */
+    padding: 1.5rem 1rem 3rem 1rem !important; /* Sem necessidade de padding gigante */
   }
 
-  /* Barra de Navegação Superior (Simplificada) */
+  /* Barra de Navegação Superior Completa e Responsiva (Igual ao Desktop, mas empilhada) */
   .navbar {
-    top: 0.5rem !important;
-    width: calc(100% - 1rem) !important;
-    padding: 0 1rem !important;
-    height: 60px !important;
+    position: sticky !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    flex-direction: column !important;
+    gap: 0.8rem !important;
+    padding: 1rem !important;
+    border-radius: 0 0 16px 16px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
   }
   .nav-brand {
-    font-size: 1.25rem !important; /* Diminui tamanho da fonte da logo no mobile para evitar quebras */
+    font-size: 1.3rem !important;
+    width: 100% !important;
+    justify-content: center !important;
   }
   .nav-links {
-    display: none !important; /* Oculta links do topo */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+    gap: 0.4rem !important;
+    width: 100% !important;
+  }
+  .nav-link {
+    padding: 0.5rem 0.8rem !important;
+    font-size: 0.8rem !important;
+    gap: 0.3rem !important;
+  }
+  .nav-user {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    border-top: 1px solid var(--border-subtle) !important;
+    padding-top: 0.6rem !important;
+    margin-top: 0.2rem !important;
+    gap: 1rem !important;
   }
   .user-email {
-    display: none !important; /* Oculta email do usuário no topo */
+    display: block !important;
+    font-size: 0.75rem !important;
+    max-width: 180px !important;
   }
   .btn-signout span {
-    display: none !important; /* Oculta texto "Sair" */
+    display: inline !important;
   }
   .btn-signout {
-    padding: 0.5rem !important;
-    height: 36px !important;
-    width: 36px !important;
-    justify-content: center !important;
-    border-radius: 50% !important;
-  }
-
-  /* Barra de Navegação Inferior (Mobile Nav) */
-  .mobile-bottom-nav {
+    padding: 0.4rem 0.8rem !important;
+    font-size: 0.8rem !important;
+    height: auto !important;
+    width: auto !important;
+    border-radius: 8px !important;
     display: flex !important;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 65px;
-    background: rgba(11, 16, 29, 0.98) !important;
-    border-top: 1px solid var(--border-subtle);
-    justify-content: space-around;
-    align-items: center;
-    z-index: 1000;
-    border-radius: 16px 16px 0 0;
-    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.5);
-    padding: 0.2rem 1rem;
-  }
-
-  .mobile-nav-link {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    gap: 0.2rem;
-    font-size: 0.7rem;
-    font-family: var(--font-body);
-    font-weight: 500;
-    cursor: pointer;
-    flex: 1;
-    height: 100%;
-    transition: var(--transition-smooth);
-  }
-
-  .mobile-nav-link svg {
-    transition: var(--transition-bounce);
-  }
-
-  .mobile-nav-link:hover, .mobile-nav-link.active {
-    color: var(--accent);
-  }
-
-  .mobile-nav-link.active svg {
-    transform: translateY(-2px) scale(1.1);
-    color: var(--accent);
+    align-items: center !important;
+    gap: 0.4rem !important;
   }
 
   /* Dashboard, Busca e Filtros */

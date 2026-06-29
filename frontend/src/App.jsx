@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Film, Heart, Gamepad2, User } from 'lucide-react';
 import { supabase } from './services/supabase.js';
 import Navbar from './components/Navbar.jsx';
 import Toast from './components/Toast.jsx';
@@ -82,40 +81,6 @@ function App() {
           <Profile user={user} addToast={addToast} />
         )}
       </main>
-
-      {/* Barra de Navegação Inferior para Mobile */}
-      {user && (
-        <div className="mobile-bottom-nav glass-panel">
-          <button 
-            className={`mobile-nav-link ${activeTab === 'catalog' ? 'active' : ''}`}
-            onClick={() => setActiveTab('catalog')}
-          >
-            <Film size={20} />
-            <span>Catálogo</span>
-          </button>
-          <button 
-            className={`mobile-nav-link ${activeTab === 'favorites' ? 'active' : ''}`}
-            onClick={() => setActiveTab('favorites')}
-          >
-            <Heart size={20} />
-            <span>Favoritos</span>
-          </button>
-          <button 
-            className={`mobile-nav-link ${activeTab === 'quiz' ? 'active' : ''}`}
-            onClick={() => setActiveTab('quiz')}
-          >
-            <Gamepad2 size={20} />
-            <span>CineQuiz</span>
-          </button>
-          <button 
-            className={`mobile-nav-link ${activeTab === 'profile' ? 'active' : ''}`}
-            onClick={() => setActiveTab('profile')}
-          >
-            <User size={20} />
-            <span>Perfil</span>
-          </button>
-        </div>
-      )}
 
       {/* Container de Toasts (Notificações Flutuantes) */}
       <div className="toast-container">
