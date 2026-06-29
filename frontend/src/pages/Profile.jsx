@@ -101,7 +101,7 @@ export const Profile = ({ user, addToast }) => {
             {userInitial}
           </div>
           <div className="profile-user-info">
-            <h2>Olá, {userName}!</h2>
+            <h2>Olá, {userName}</h2>
             <p>{user.email}</p>
           </div>
         </div>
