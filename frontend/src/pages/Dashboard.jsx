@@ -19,20 +19,20 @@ import MovieDetailsModal from '../components/MovieDetailsModal.jsx';
 
 // Tabs do catálogo
 const TABS = [
-  { id: 'trending',    label: 'Tendências',  icon: TrendingUp },
-  { id: 'movies',      label: 'Filmes',      icon: Film },
-  { id: 'tv',          label: 'Séries',      icon: Tv },
-  { id: 'nowplaying',  label: 'Em Cartaz',   icon: Clapperboard },
+  { id: 'trending', label: 'Tendências', icon: TrendingUp },
+  { id: 'movies', label: 'Filmes', icon: Film },
+  { id: 'tv', label: 'Séries', icon: Tv },
+  { id: 'nowplaying', label: 'Em Cartaz', icon: Clapperboard },
 ];
 
 // Busca os dados de acordo com a aba ativa
 const fetchByTab = async (tab, page = 1) => {
   switch (tab) {
-    case 'trending':   return [...await getTrendingMovies(page), ...await getTrendingTV(page)];
-    case 'movies':     return getPopularMovies(page);
-    case 'tv':         return getPopularTV(page);
+    case 'trending': return [...await getTrendingMovies(page), ...await getTrendingTV(page)];
+    case 'movies': return getPopularMovies(page);
+    case 'tv': return getPopularTV(page);
     case 'nowplaying': return [...await getNowPlaying(page), ...await getAiringToday(page)];
-    default:           return getTrendingMovies(page);
+    default: return getTrendingMovies(page);
   }
 };
 
@@ -52,18 +52,18 @@ const SkeletonLoader = () => (
 );
 
 export const Dashboard = ({ user, addToast }) => {
-  const [items, setItems]           = useState([]);
-  const [favorites, setFavorites]   = useState([]);
-  const [loading, setLoading]       = useState(true);
+  const [items, setItems] = useState([]);
+  const [favorites, setFavorites] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [activeTab, setActiveTab]   = useState('trending');
-  const [search, setSearch]         = useState('');
+  const [activeTab, setActiveTab] = useState('trending');
+  const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-  const [searching, setSearching]   = useState(false);
-  const [page, setPage]             = useState(1);
+  const [searching, setSearching] = useState(false);
+  const [page, setPage] = useState(1);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [loadingRandom, setLoadingRandom] = useState(false);
-  const [hasError, setHasError]     = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   // Seleciona um filme ou série aleatória garantindo trailer e watch providers
   const handleRandomSelect = async () => {
@@ -79,7 +79,7 @@ export const Dashboard = ({ user, addToast }) => {
       } else {
         // Busca de uma página aleatória do TMDB (1 a 5)
         const randomPage = Math.floor(Math.random() * 5) + 1;
-        
+
         if (activeTab === 'trending') {
           const pickMovie = Math.random() > 0.5;
           if (pickMovie) {
@@ -112,7 +112,7 @@ export const Dashboard = ({ user, addToast }) => {
 
       // Limitar a busca sequencial a no máximo 15 candidatos para evitar sobrecarga de rede
       const maxChecks = Math.min(shuffled.length, 15);
-      
+
       // Abre uma notificação indicando que estamos procurando uma produção bem completa
       addToast('Procurando um título completo com trailer e streaming...', 'info');
 
@@ -173,7 +173,7 @@ export const Dashboard = ({ user, addToast }) => {
       setLoadingRandom(false);
     }
   };
-  
+
   // Filtros avançados
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
@@ -184,10 +184,10 @@ export const Dashboard = ({ user, addToast }) => {
     maxRuntime: '',
   });
 
-  const searchTimeout               = useRef(null);
-  const loadMoreRef                 = useRef(null);
-  const isSearching                 = search.trim().length > 0;
-  
+  const searchTimeout = useRef(null);
+  const loadMoreRef = useRef(null);
+  const isSearching = search.trim().length > 0;
+
   const isFilterActive = filters.genre !== '' || filters.year !== '' || filters.sortBy !== 'popularity.desc' || filters.maxRuntime !== '';
 
   // Carrega favoritos do backend
@@ -342,13 +342,13 @@ export const Dashboard = ({ user, addToast }) => {
       {/* Cabeçalho de Boas-vindas */}
       <div className="dashboard-user-header">
         <div className="dashboard-user-info">
-          <h2 className="dashboard-greeting">Olá {user?.user_metadata?.display_name || (user?.email ? user.email.split('@')[0] : 'Cineasta')}!</h2>
+          <h2 className="dashboard-greeting">Olá {user?.user_metadata?.display_name || (user?.email ? user.email.split('@')[0] : 'Cineasta')}</h2>
           <span className="dashboard-subgreeting">Escolha seu filme favorito</span>
         </div>
         <div className="dashboard-user-avatar">
           <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--accent)' }}>
-            {user?.user_metadata?.display_name 
-              ? user.user_metadata.display_name[0].toUpperCase() 
+            {user?.user_metadata?.display_name
+              ? user.user_metadata.display_name[0].toUpperCase()
               : (user?.email ? user.email[0].toUpperCase() : 'U')}
           </span>
         </div>
@@ -377,8 +377,8 @@ export const Dashboard = ({ user, addToast }) => {
           )}
         </div>
         <div className="search-right-control">
-          <SlidersHorizontal 
-            size={18} 
+          <SlidersHorizontal
+            size={18}
             className={`search-filter-icon ${showFilters ? 'active' : ''}`}
             onClick={() => setShowFilters(!showFilters)}
             title="Filtros avançados"
@@ -451,7 +451,7 @@ export const Dashboard = ({ user, addToast }) => {
               />
             </div>
           </div>
- 
+
           <div className="filter-group">
             <label>Ordenar por</label>
             <select
@@ -528,7 +528,7 @@ export const Dashboard = ({ user, addToast }) => {
               {searchResults.length} resultado(s) para "{search}"
             </p>
           )}
-          
+
           {isFilterActive && !isSearching && (
             <p style={{ color: 'var(--text-muted)', marginBottom: '1.2rem', fontSize: '0.9rem' }}>
               Filtro ativo: {filters.mediaType === 'movie' ? 'Filmes' : 'Séries'}
