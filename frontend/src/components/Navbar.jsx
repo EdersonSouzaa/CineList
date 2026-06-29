@@ -1,12 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import { Film, Heart, LogOut, User, Gamepad2 } from 'lucide-react';
 import { supabase } from '../services/supabase.js';
 import iconeApp from '../assets/app_icone.png';
 
 export const Navbar = ({ activeTab, setActiveTab, user, addToast }) => {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
-
   const handleSignOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -16,19 +13,6 @@ export const Navbar = ({ activeTab, setActiveTab, user, addToast }) => {
       addToast(`Erro ao sair: ${error.message}`, 'error');
     }
   };
-
-  // Fechar o menu dropdown quando clicar fora dele
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const firstLetter = user?.email ? user.email[0].toUpperCase() : 'U';
 
   return (
     <>
@@ -88,27 +72,14 @@ export const Navbar = ({ activeTab, setActiveTab, user, addToast }) => {
               </button>
             </div>
 
-            {/* Controle de usuário exclusivo para Mobile (Avatar + Dropdown) */}
-            <div className="mobile-user-control mobile-only" ref={dropdownRef}>
-              <button 
-                className="mobile-avatar-btn" 
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-              >
-                {firstLetter}
-              </button>
-              
-              {dropdownOpen && (
-                <div className="navbar-dropdown glass-panel fade-in">
-                  <div className="dropdown-user-info">
-                    <span className="dropdown-email">{user.email}</span>
-                  </div>
-                  <button className="dropdown-item signout-item" onClick={() => { setDropdownOpen(false); handleSignOut(); }}>
-                    <LogOut size={16} />
-                    <span>Sair</span>
-                  </button>
-                </div>
-              )}
-            </div>
+            {/* Botão de deslogar exclusivo para Mobile */}
+            <button 
+              className="mobile-logout-btn mobile-only" 
+              onClick={handleSignOut}
+              title="Sair"
+            >
+              <LogOut size={20} />
+            </button>
           </>
         )}
       </nav>
