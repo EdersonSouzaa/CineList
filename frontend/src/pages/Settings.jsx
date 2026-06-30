@@ -21,7 +21,6 @@ export const Settings = ({ user, addToast }) => {
   // Configurações locais (modo claro/escuro)
   const [theme, setTheme] = useState(localStorage.getItem('cinelist_theme') === 'light' ? 'light' : 'dark');
   const [language, setLanguage] = useState(localStorage.getItem('cinelist_language') || 'pt-BR');
-  const [includeAdult, setIncludeAdult] = useState(localStorage.getItem('cinelist_include_adult') === 'true');
 
   // Estado de instalação do PWA e Modais
   const [installable, setInstallable] = useState(!!window.deferredPrompt);
@@ -72,12 +71,7 @@ export const Settings = ({ user, addToast }) => {
     addToast('Idioma do catálogo atualizado!', 'success');
   };
 
-  const handleAdultToggle = (e) => {
-    const checked = e.target.checked;
-    setIncludeAdult(checked);
-    localStorage.setItem('cinelist_include_adult', String(checked));
-    addToast(checked ? 'Conteúdo adulto ativado.' : 'Conteúdo adulto desativado.', 'info');
-  };
+
 
   const handleInstallClick = async () => {
     const promptEvent = window.deferredPrompt;
@@ -255,44 +249,27 @@ export const Settings = ({ user, addToast }) => {
           </div>
         </div>
 
-        {/* Filtros e Idioma */}
+        {/* Idioma do Catálogo */}
         <div className="settings-card glass-panel">
           <div className="settings-card-header">
             <Globe size={22} style={{ color: 'var(--accent)' }} />
             <div>
-              <h3>Preferências de Conteúdo</h3>
-              <p>Ajuste os filtros de listagem do catálogo de filmes</p>
+              <h3>Idioma do Catálogo</h3>
+              <p>Selecione o idioma dos títulos e descrições dos filmes (TMDB)</p>
             </div>
           </div>
           <div className="settings-options" style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', marginTop: '1.2rem' }}>
             <div className="settings-option-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Idioma do Catálogo</h4>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Idioma dos títulos e descrições dos filmes (TMDB)</p>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Idioma de Exibição</h4>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Selecione o idioma desejado para o catálogo</p>
               </div>
               <select className="filter-select" value={language} onChange={handleLanguageChange} style={{ width: '150px' }}>
                 <option value="pt-BR">Português (BR)</option>
                 <option value="en-US">Inglês (US)</option>
               </select>
             </div>
-
-            <div className="settings-option-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-subtle)', paddingTop: '1.2rem' }}>
-              <div>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Filtro de Conteúdo Adulto (+18)</h4>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Exibir filmes e produções adultas nas buscas e recomendações</p>
-              </div>
-              <label className="toggle-switch">
-                <input
-                  type="checkbox"
-                  className="toggle-input"
-                  checked={includeAdult}
-                  onChange={handleAdultToggle}
-                />
-                <span className="toggle-slider">
-                  <span className="toggle-circle" />
-                </span>
-              </label>
-            </div>
+            {/* Filtro de conteúdo adulto removido permanentemente */}
           </div>
         </div>
 

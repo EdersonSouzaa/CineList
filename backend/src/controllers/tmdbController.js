@@ -29,6 +29,9 @@ export const getProxyTMDB = async (req, res) => {
     targetUrl.searchParams.set(key, val);
   });
 
+  // Força a remoção de qualquer produção classificada como conteúdo adulto (+18)
+  targetUrl.searchParams.set('include_adult', 'false');
+
   try {
     const response = await fetch(targetUrl.toString());
     const data = await response.json();

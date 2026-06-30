@@ -122,8 +122,7 @@ export const getAiringToday = async (page = 1) => {
 /** Busca unificada por texto (filmes + séries) */
 export const searchMulti = async (query, page = 1) => {
   if (!query.trim()) return [];
-  const includeAdult = localStorage.getItem('cinelist_include_adult') === 'true';
-  const data = await fetchTMDB('/search/multi', { query, page, include_adult: includeAdult });
+  const data = await fetchTMDB('/search/multi', { query, page, include_adult: 'false' });
   return data.results
     .filter(r => (r.media_type === 'movie' || r.media_type === 'tv') && r.poster_path)
     .map(r => normalizeItem(r, r.media_type));
@@ -132,8 +131,7 @@ export const searchMulti = async (query, page = 1) => {
 /** Busca avançada com filtros (Discover) */
 export const discoverContent = async (mediaType = 'movie', filters = {}, page = 1) => {
   const params = { page };
-  const includeAdult = localStorage.getItem('cinelist_include_adult') === 'true';
-  params.include_adult = includeAdult;
+  params.include_adult = 'false';
 
   if (filters.genre) {
     params.with_genres = filters.genre;
