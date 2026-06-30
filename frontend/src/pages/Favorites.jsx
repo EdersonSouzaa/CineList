@@ -120,6 +120,7 @@ export const Favorites = ({ user, addToast }) => {
                   alt={movie.title}
                   className="ticket-card-poster"
                   onError={e => {
+                    e.target.onerror = null;
                     e.target.src = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=500&auto=format&fit=crop';
                   }}
                 />

@@ -320,6 +320,7 @@ export const MovieDetailsModal = ({ movie, user, onClose, addToast, onReviewAdde
               alt={details.title}
               className="modal-poster"
               onError={e => {
+                e.target.onerror = null;
                 e.target.src = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=500&auto=format&fit=crop';
               }}
             />

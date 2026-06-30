@@ -38,7 +38,7 @@ export const Auth = ({ addToast }) => {
           }
         });
         if (error) throw error;
-        addToast('Conta criada! Se o seu projeto exigir confirmação de e-mail, verifique sua caixa de entrada.', 'info', 6000);
+        addToast('Conta criada com sucesso! Seja bem-vindo ao CineList!', 'success', 4000);
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
