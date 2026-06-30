@@ -186,6 +186,7 @@ export const Dashboard = ({ user, addToast }) => {
 
   const searchTimeout = useRef(null);
   const loadMoreRef = useRef(null);
+  const lastTabRef = useRef(activeTab);
   const isSearching = search.trim().length > 0;
 
   const isFilterActive = filters.genre !== '' || filters.year !== '' || filters.sortBy !== 'popularity.desc' || filters.maxRuntime !== '';
@@ -231,26 +232,32 @@ export const Dashboard = ({ user, addToast }) => {
     }
   }, [activeTab, filters, isFilterActive, addToast]);
 
-  // Reset de filtros quando muda aba do catálogo
+  // Controla o carregamento de dados e reset de filtros de forma unificada para evitar double-fetching (piscar de tela)
   useEffect(() => {
-    setFilters({
-      mediaType: activeTab === 'tv' ? 'tv' : 'movie',
-      genre: '',
-      year: '',
-      sortBy: 'popularity.desc',
-      maxRuntime: '',
-    });
-    setPage(1);
-    setSearch('');
-    setHasError(false);
-    loadFavorites();
-  }, [activeTab, loadFavorites]);
-
-  // Carrega dados quando filtros mudam
-  useEffect(() => {
+    const isTabChanging = activeTab !== lastTabRef.current;
+    
+    if (isTabChanging) {
+      // Se a aba mudou, primeiro resetamos os filtros e atualizamos o lastTabRef.
+      // O reset dos filtros vai disparar este mesmo useEffect na próxima renderização com a nova aba.
+      lastTabRef.current = activeTab;
+      setFilters({
+        mediaType: activeTab === 'tv' ? 'tv' : 'movie',
+        genre: '',
+        year: '',
+        sortBy: 'popularity.desc',
+        maxRuntime: '',
+      });
+      setPage(1);
+      setSearch('');
+      setHasError(false);
+      loadFavorites();
+      return; // Interrompe para não fazer fetch com filtros antigos
+    }
+    
+    // Se a aba não mudou (ou seja, foi apenas uma mudança de filtros ou render pós-reset), carregamos os dados
     setPage(1);
     loadData(1);
-  }, [filters, loadData]);
+  }, [activeTab, filters, loadData, loadFavorites]);
 
   // Busca ao vivo com debounce de 400ms
   useEffect(() => {
