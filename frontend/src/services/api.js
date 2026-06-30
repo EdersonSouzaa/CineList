@@ -3,19 +3,37 @@ import { supabase } from './supabase.js';
 const getApiUrl = () => {
   const envUrl = import.meta.env.VITE_API_URL;
   
-  // Se a variável de ambiente estiver definida no build (ex: em produção), usamos ela diretamente
-  if (envUrl) {
-    return envUrl;
-  }
-  
-  // Caso contrário, determinamos a URL dinamicamente com base no dispositivo que está acessando
   if (typeof window !== 'undefined') {
     const { protocol, hostname } = window.location;
-    // Se estivermos acessando por IP local ou localhost, apontamos para a porta 3001 no mesmo host.
+    const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1';
+    const isLocalNetwork = hostname.startsWith('192.168.') || 
+                           hostname.startsWith('10.') || 
+                           hostname.startsWith('172.');
+    
+    if (envUrl) {
+      // Se estamos em produção real (ex: Vercel) mas a URL do build aponta para localhost (configuração padrão),
+      // redirecionamos automaticamente para o Render de produção.
+      if (!isLocalHost && !isLocalNetwork && (envUrl.includes('localhost') || envUrl.includes('127.0.0.1'))) {
+        return 'https://cinelist-m8q5.onrender.com/api';
+      }
+      // Se estamos testando na rede local (ex: celular), ajustamos o localhost para o IP do computador
+      if (isLocalNetwork && (envUrl.includes('localhost') || envUrl.includes('127.0.0.1'))) {
+        return envUrl.replace(/localhost|127\.0\.0\.1/, hostname);
+      }
+      return envUrl;
+    }
+    
+    // Se não houver variável VITE_API_URL definida no build:
+    if (!isLocalHost && !isLocalNetwork) {
+      // Produção ao vivo na Vercel -> aponta para o Render de produção
+      return 'https://cinelist-m8q5.onrender.com/api';
+    }
+    
+    // Desenvolvimento local -> aponta para o servidor local na porta 3001
     return `${protocol}//${hostname}:3001/api`;
   }
   
-  return 'http://localhost:3001/api';
+  return envUrl || 'http://localhost:3001/api';
 };
 
 const API_URL = getApiUrl();
