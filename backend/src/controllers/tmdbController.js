@@ -4,11 +4,37 @@ dotenv.config();
 const TMDB_KEY = process.env.TMDB_KEY;
 const BASE_URL = 'https://api.themoviedb.org/3';
 
+// Lista de palavras bloqueadas para purificar o app de conteúdos adultos/18+
+const BLACKLIST = [
+  'hentai', 'porno', 'porn', 'xxx', 'sexo', 'erotico', 'erotica', 'erótico', 'erótica',
+  'softcore', 'playboy', 'kamasutra', 'ninfeta', 'nudez', 'nude', 'sexe', 'sensual'
+];
+
+// Helper para verificar se um texto contém palavras bloqueadas
+const containsBlockedWord = (text) => {
+  if (!text) return false;
+  const textLower = text.toLowerCase();
+  
+  // 1. Verifica termos da lista negra
+  const hasBlocked = BLACKLIST.some(word => textLower.includes(word));
+  if (hasBlocked) return true;
+  
+  // 2. Verifica a palavra exata "sex" usando limite de palavra para evitar bloquear "sexta" ou "sexto"
+  const hasSexWord = /\bsex\b/i.test(textLower);
+  return hasSexWord;
+};
+
 export const getProxyTMDB = async (req, res) => {
   const { path } = req.query;
 
   if (!path) {
     return res.status(400).json({ error: 'O parâmetro path é obrigatório.' });
+  }
+
+  // 1. Verifica se a query de busca contém palavras impróprias
+  const queryParam = req.query.query || '';
+  if (containsBlockedWord(queryParam)) {
+    return res.json({ results: [], page: 1, total_pages: 1, total_results: 0 });
   }
 
   // Copia os parâmetros da query da requisição original, removendo o "path"
@@ -38,6 +64,15 @@ export const getProxyTMDB = async (req, res) => {
 
     if (!response.ok) {
       return res.status(response.status).json(data);
+    }
+
+    // 2. Filtra os resultados da API para remover qualquer filme/série com palavras banidas no título ou descrição
+    if (data.results && Array.isArray(data.results)) {
+      data.results = data.results.filter(item => {
+        const title = item.title || item.name || '';
+        const overview = item.overview || '';
+        return !containsBlockedWord(title) && !containsBlockedWord(overview);
+      });
     }
 
     return res.json(data);
