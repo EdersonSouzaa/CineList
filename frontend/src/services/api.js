@@ -56,6 +56,19 @@ const getHeaders = async () => {
   return headers;
 };
 
+// Auxiliar para tratar a resposta HTTP e deslogar caso o token no backend seja considerado inválido (401)
+const handleResponse = async (response, method) => {
+  if (!response.ok) {
+    if (response.status === 401) {
+      // Limpa a sessão no frontend caso o token seja rejeitado pelo Express/Postgres
+      supabase.auth.signOut();
+    }
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || `Erro na requisição ${method}: ${response.status}`);
+  }
+  return response.json();
+};
+
 export const api = {
   // Requisição GET
   async get(endpoint) {
@@ -64,12 +77,7 @@ export const api = {
       method: 'GET',
       headers,
     });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `Erro na requisição GET: ${response.status}`);
-    }
-    return response.json();
+    return handleResponse(response, 'GET');
   },
 
   // Requisição POST
@@ -80,12 +88,7 @@ export const api = {
       headers,
       body: JSON.stringify(body),
     });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `Erro na requisição POST: ${response.status}`);
-    }
-    return response.json();
+    return handleResponse(response, 'POST');
   },
 
   // Requisição DELETE
@@ -95,11 +98,6 @@ export const api = {
       method: 'DELETE',
       headers,
     });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `Erro na requisição DELETE: ${response.status}`);
-    }
-    return response.json();
+    return handleResponse(response, 'DELETE');
   }
 };

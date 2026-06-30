@@ -66,6 +66,25 @@ function setLocalSession(session) {
   });
 }
 
+// Helper para decodificar o payload de um token JWT no navegador
+function decodeJwt(token) {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const base64Url = parts[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      window.atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (err) {
+    return null;
+  }
+}
+
 export const supabase = {
   auth: {
     // Cadastro de usuário redirecionado ao Express
@@ -156,48 +175,27 @@ export const supabase = {
       }
     },
 
-    // Obter sessão atual salva e validar
+    // Obter sessão atual salva e validar a expiração localmente sem requisições de rede redundantes
     async getSession() {
       const session = getLocalSession();
       if (!session || !session.access_token) {
         return { data: { session: null }, error: null };
       }
       
-      try {
-        const response = await fetch(`${API_URL}/auth/me`, {
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`
-          }
-        });
-        
-        if (!response.ok) {
-          throw new Error('Token inválido ou expirado');
-        }
-        
-        const userData = await response.json();
-        
-        // Verifica se o usuário deslogou enquanto a requisição era feita
-        const currentSession = getLocalSession();
-        if (!currentSession) {
-          return { data: { session: null }, error: null };
-        }
-        
-        // Atualiza a sessão com dados frescos do usuário
-        const updatedSession = {
-          ...currentSession,
-          user: {
-            ...currentSession.user,
-            ...userData
-          }
-        };
-        
-        setLocalSession(updatedSession);
-        return { data: { session: updatedSession }, error: null };
-      } catch (error) {
-        // Se a validação falhar, limpa a sessão local
+      const payload = decodeJwt(session.access_token);
+      if (!payload) {
         setLocalSession(null);
         return { data: { session: null }, error: null };
       }
+      
+      const currentTimestamp = Math.floor(Date.now() / 1000);
+      if (payload.exp && currentTimestamp > payload.exp) {
+        // Token expirado localmente, limpa a sessão
+        setLocalSession(null);
+        return { data: { session: null }, error: null };
+      }
+      
+      return { data: { session }, error: null };
     },
 
     // Monitorar login/logout
