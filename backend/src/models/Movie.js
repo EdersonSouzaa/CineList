@@ -1,34 +1,46 @@
 import { db } from '../config/db.js';
-import crypto from 'crypto';
 
 export const Movie = {
-  // Obter todos os filmes
+  // Opcional: Se quiser armazenar um cache de filmes localmente no PG
   async getAll() {
-    return db.getCollection('movies');
+    try {
+      const result = await db.query('SELECT * FROM movies');
+      return result.rows;
+    } catch (e) {
+      console.warn("Tabela movies não existe ou falhou. Ignorando.");
+      return [];
+    }
   },
 
-  // Obter filme específico pelo ID
   async getById(id) {
-    const movies = db.getCollection('movies');
-    return movies.find(m => m.id === id) || null;
+    try {
+      const result = await db.query('SELECT * FROM movies WHERE id = $1', [id]);
+      return result.rows[0] || null;
+    } catch (e) {
+      return null;
+    }
   },
 
-  // Criar um novo filme (caso queira expandir o catálogo)
   async create(movieData) {
-    const movies = db.getCollection('movies');
-    
-    const newMovie = {
-      id: crypto.randomUUID(),
-      title: movieData.title,
-      overview: movieData.overview,
-      poster_url: movieData.poster_url,
-      release_date: movieData.release_date,
-      genre: movieData.genre
-    };
-
-    movies.push(newMovie);
-    db.saveCollection('movies', movies);
-    
-    return newMovie;
+    const query = `
+      INSERT INTO movies (id, title, overview, poster_url, release_date, genre)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      ON CONFLICT (id) DO NOTHING
+      RETURNING *
+    `;
+    const values = [
+      movieData.id,
+      movieData.title,
+      movieData.overview,
+      movieData.poster_url,
+      movieData.release_date,
+      movieData.genre
+    ];
+    try {
+      const result = await db.query(query, values);
+      return result.rows[0];
+    } catch (e) {
+      return null;
+    }
   }
 };

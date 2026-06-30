@@ -1,64 +1,37 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import pkg from 'pg';
+const { Pool } = pkg;
+import dotenv from 'dotenv';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+dotenv.config();
 
-// Define o caminho para a pasta data na raiz do backend
-const DATA_DIR = path.join(__dirname, '..', '..', 'data');
-const DB_PATH = path.join(DATA_DIR, 'db.json');
-
-// Garante que o diretório data exista
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-}
-
-// Inicializa o banco de dados se ele não existir
-const initialSchema = {
-  users: [],
-  reviews: [],
-  favorites: [],
-  review_likes: []
-};
-
-if (!fs.existsSync(DB_PATH)) {
-  fs.writeFileSync(DB_PATH, JSON.stringify(initialSchema, null, 2), 'utf-8');
-}
+// Configuração do Pool do PostgreSQL usando a URL do banco (ex: fornecida pelo Render)
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
 
 export const db = {
-  // Ler todos os dados
-  read() {
+  // Executa queries no PostgreSQL
+  async query(text, params) {
+    const start = Date.now();
     try {
-      const content = fs.readFileSync(DB_PATH, 'utf-8');
-      return JSON.parse(content);
-    } catch (error) {
-      console.error('Erro ao ler banco de dados JSON:', error);
-      return initialSchema;
+      const res = await pool.query(text, params);
+      const duration = Date.now() - start;
+      console.log('Executed query', { text, duration, rows: res.rowCount });
+      return res;
+    } catch (err) {
+      console.error('Database query error:', err);
+      throw err;
     }
   },
-
-  // Escrever dados completos
-  write(data) {
-    try {
-      fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf-8');
-      return true;
-    } catch (error) {
-      console.error('Erro ao escrever banco de dados JSON:', error);
-      return false;
-    }
-  },
-
-  // Helper para obter uma coleção específica
+  
+  // Mantido apenas para compatibilidade (mas deve ser removido após atualizar os controllers)
   getCollection(name) {
-    const data = this.read();
-    return data[name] || [];
+    console.warn(`Atenção: getCollection chamada para '${name}'. Esta função está obsoleta com o PostgreSQL.`);
+    return [];
   },
-
-  // Helper para salvar uma coleção específica
   saveCollection(name, collection) {
-    const data = this.read();
-    data[name] = collection;
-    return this.write(data);
+    console.warn(`Atenção: saveCollection chamada para '${name}'. Esta função está obsoleta com o PostgreSQL.`);
+    return true;
   }
 };

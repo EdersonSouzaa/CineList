@@ -106,10 +106,42 @@ export const supabase = {
       }
     },
 
-    // Obter sessão atual salva
+    // Obter sessão atual salva e validar
     async getSession() {
       const session = getLocalSession();
-      return { data: { session }, error: null };
+      if (!session || !session.access_token) {
+        return { data: { session: null }, error: null };
+      }
+      
+      try {
+        const response = await fetch(`${API_URL}/auth/me`, {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Token inválido ou expirado');
+        }
+        
+        const userData = await response.json();
+        
+        // Atualiza a sessão com dados frescos do usuário
+        const updatedSession = {
+          ...session,
+          user: {
+            ...session.user,
+            ...userData
+          }
+        };
+        
+        setLocalSession(updatedSession);
+        return { data: { session: updatedSession }, error: null };
+      } catch (error) {
+        // Se a validação falhar, limpa a sessão local
+        setLocalSession(null);
+        return { data: { session: null }, error: null };
+      }
     },
 
     // Monitorar login/logout

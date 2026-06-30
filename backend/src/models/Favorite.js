@@ -1,53 +1,44 @@
 import { db } from '../config/db.js';
-import crypto from 'crypto';
 
 export const Favorite = {
-  // Obter todos os favoritos do usuário
   async getByUserId(userId) {
-    const favorites = db.getCollection('favorites');
-    
-    // Filtra favoritos pelo ID do usuário e ordena do mais recente
-    return favorites
-      .filter(f => f.user_id === userId)
-      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    const query = `
+      SELECT * FROM favorites
+      WHERE user_id = $1
+      ORDER BY created_at DESC
+    `;
+    const result = await db.query(query, [userId]);
+    return result.rows;
   },
 
-  // Adicionar filme/série aos favoritos (movie_id é string "movie_123" ou "tv_456")
   async add(movieId, userId, userEmail) {
-    const favorites = db.getCollection('favorites');
-
-    // Evita duplicados
-    const isAlreadyFavorite = favorites.some(f => f.movie_id === String(movieId) && f.user_id === userId);
-    if (isAlreadyFavorite) {
-      return favorites.find(f => f.movie_id === String(movieId) && f.user_id === userId);
+    const query = `
+      INSERT INTO favorites (movie_id, user_id, user_email)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (movie_id, user_id) DO NOTHING
+      RETURNING *
+    `;
+    const result = await db.query(query, [String(movieId), userId, userEmail]);
+    
+    // Se o conflito impediu o insert, fazemos um select
+    if (result.rowCount === 0) {
+      const selectResult = await db.query(
+        'SELECT * FROM favorites WHERE movie_id = $1 AND user_id = $2',
+        [String(movieId), userId]
+      );
+      return selectResult.rows[0];
     }
-
-    const newFavorite = {
-      id: crypto.randomUUID(),
-      movie_id: String(movieId),
-      user_id: userId,
-      user_email: userEmail,
-      created_at: new Date().toISOString()
-    };
-
-    favorites.push(newFavorite);
-    db.saveCollection('favorites', favorites);
-
-    return newFavorite;
+    
+    return result.rows[0];
   },
 
-  // Remover filme/série dos favoritos
   async remove(movieId, userId) {
-    const favorites = db.getCollection('favorites');
-
-    const index = favorites.findIndex(f => f.movie_id === String(movieId) && f.user_id === userId);
-    if (index === -1) {
-      return [];
-    }
-
-    const [deletedFavorite] = favorites.splice(index, 1);
-    db.saveCollection('favorites', favorites);
-
-    return [deletedFavorite];
+    const query = `
+      DELETE FROM favorites
+      WHERE movie_id = $1 AND user_id = $2
+      RETURNING *
+    `;
+    const result = await db.query(query, [String(movieId), userId]);
+    return result.rows;
   }
 };
