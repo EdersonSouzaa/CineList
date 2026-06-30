@@ -133,3 +133,60 @@ export const getMe = async (req, res) => {
     res.status(500).json({ error: 'Erro interno no servidor ao buscar dados do usuário.' });
   }
 };
+
+export const updateProfile = async (req, res) => {
+  const { display_name } = req.body;
+  const user_id = req.user.id;
+
+  if (!display_name || !display_name.trim()) {
+    return res.status(400).json({ error: 'Nome de exibição é obrigatório.' });
+  }
+
+  try {
+    const result = await db.query(
+      `UPDATE users 
+       SET display_name = $1 
+       WHERE id = $2 
+       RETURNING id, email, display_name, created_at`,
+      [display_name.trim(), user_id]
+    );
+
+    const updatedUser = result.rows[0];
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'Usuário não encontrado.' });
+    }
+
+    // Gera um novo token com os dados atualizados do usuário
+    const tokenPayload = {
+      id: updatedUser.id,
+      email: updatedUser.email,
+      user_metadata: { display_name: updatedUser.display_name }
+    };
+    const accessToken = jwt.sign(tokenPayload);
+
+    // Retorna a estrutura compatível com a sessão do Supabase utilizada pelo frontend
+    res.json({
+      user: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        created_at: updatedUser.created_at,
+        user_metadata: { display_name: updatedUser.display_name }
+      },
+      session: {
+        access_token: accessToken,
+        token_type: 'bearer',
+        expires_in: 604800,
+        user: {
+          id: updatedUser.id,
+          email: updatedUser.email,
+          created_at: updatedUser.created_at,
+          user_metadata: { display_name: updatedUser.display_name }
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar perfil:', error);
+    res.status(500).json({ error: 'Erro interno no servidor ao atualizar perfil.' });
+  }
+};
+

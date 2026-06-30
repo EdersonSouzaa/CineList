@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { initDatabase } from './src/config/db.js';
+
 
 // Importando as rotas do MVC
 // Nota: A rota de filmes foi removida — o catálogo agora vem diretamente da API do TMDB (frontend)
@@ -24,7 +26,14 @@ app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
     
+    // Permite conexões locais (localhost/127.0.0.1) e também redes locais (ex: 192.168.x.x, 10.x.x.x, 172.x.x.x)
+    // para viabilizar testes em múltiplos dispositivos (celulares, tablets, etc.)
+    const isLocalNetwork = origin.startsWith('http://192.168.') || 
+                           origin.startsWith('http://10.') || 
+                           origin.startsWith('http://172.');
+                           
     const isAllowed = allowedOrigins.includes(origin) || 
+                      isLocalNetwork ||
                       origin.endsWith('.onrender.com') || 
                       origin.endsWith('.vercel.app');
                       
@@ -86,10 +95,18 @@ app.get('/api/health', (req, res) => {
 });
 
 // Iniciando o servidor
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`===================================================`);
   console.log(`🚀 Servidor CineList rodando em http://localhost:${PORT}`);
   console.log(`📂 Padrão MVC configurado com sucesso!`);
   console.log(`===================================================`);
+  
+  try {
+    console.log('⚡ Inicializando conexão e tabelas do banco de dados...');
+    await initDatabase();
+    console.log('✅ Banco de dados inicializado com sucesso!');
+  } catch (err) {
+    console.error('❌ Erro crítico ao inicializar o banco de dados:', err);
+  }
 });
 export default app;

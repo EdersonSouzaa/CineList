@@ -1,17 +1,19 @@
 // Mock do cliente Supabase para rodar 100% localmente no Express
 const getApiUrl = () => {
   const envUrl = import.meta.env.VITE_API_URL;
-  const isLocalHost = typeof window !== 'undefined' && 
-    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-
-  // Se a variável estiver definida e NÃO apontar para localhost (ou se estiver rodando localmente)
-  if (envUrl && (!envUrl.includes('localhost') && !envUrl.includes('127.0.0.1') || isLocalHost)) {
+  
+  // Se a variável de ambiente estiver definida no build (ex: em produção), usamos ela diretamente
+  if (envUrl) {
     return envUrl;
   }
-  // Se estiver em produção, aponta diretamente para o backend do Render
-  if (typeof window !== 'undefined' && !isLocalHost) {
-    return 'https://cinelist-m8q5.onrender.com/api';
+  
+  // Caso contrário, determinamos a URL dinamicamente com base no dispositivo que está acessando
+  if (typeof window !== 'undefined') {
+    const { protocol, hostname } = window.location;
+    // Se estivermos acessando por IP local ou localhost, apontamos para a porta 3001 no mesmo host.
+    return `${protocol}//${hostname}:3001/api`;
   }
+  
   return 'http://localhost:3001/api';
 };
 
@@ -106,6 +108,37 @@ export const supabase = {
       }
     },
 
+    // Atualizar dados do usuário no Express
+    async updateUser({ data }) {
+      try {
+        const session = getLocalSession();
+        if (!session || !session.access_token) {
+          throw new Error('Sessão expirada ou usuário não autenticado.');
+        }
+
+        const response = await fetch(`${API_URL}/auth/update`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({ display_name: data.display_name })
+        });
+
+        const resData = await response.json();
+        if (!response.ok) {
+          throw new Error(resData.error || 'Erro ao atualizar perfil.');
+        }
+
+        // Salva a nova sessão no localStorage e notifica os componentes React
+        setLocalSession(resData.session);
+
+        return { data: { user: resData.user }, error: null };
+      } catch (error) {
+        return { data: { user: null }, error };
+      }
+    },
+
     // Obter sessão atual salva e validar
     async getSession() {
       const session = getLocalSession();
@@ -126,11 +159,17 @@ export const supabase = {
         
         const userData = await response.json();
         
+        // Verifica se o usuário deslogou enquanto a requisição era feita
+        const currentSession = getLocalSession();
+        if (!currentSession) {
+          return { data: { session: null }, error: null };
+        }
+        
         // Atualiza a sessão com dados frescos do usuário
         const updatedSession = {
-          ...session,
+          ...currentSession,
           user: {
-            ...session.user,
+            ...currentSession.user,
             ...userData
           }
         };

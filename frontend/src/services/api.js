@@ -2,17 +2,19 @@ import { supabase } from './supabase.js';
 
 const getApiUrl = () => {
   const envUrl = import.meta.env.VITE_API_URL;
-  const isLocalHost = typeof window !== 'undefined' && 
-    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-
-  // Se a variável estiver definida e NÃO apontar para localhost (ou se estiver rodando localmente)
-  if (envUrl && (!envUrl.includes('localhost') && !envUrl.includes('127.0.0.1') || isLocalHost)) {
+  
+  // Se a variável de ambiente estiver definida no build (ex: em produção), usamos ela diretamente
+  if (envUrl) {
     return envUrl;
   }
-  // Se estiver em produção, aponta diretamente para o backend do Render
-  if (typeof window !== 'undefined' && !isLocalHost) {
-    return 'https://cinelist-m8q5.onrender.com/api';
+  
+  // Caso contrário, determinamos a URL dinamicamente com base no dispositivo que está acessando
+  if (typeof window !== 'undefined') {
+    const { protocol, hostname } = window.location;
+    // Se estivermos acessando por IP local ou localhost, apontamos para a porta 3001 no mesmo host.
+    return `${protocol}//${hostname}:3001/api`;
   }
+  
   return 'http://localhost:3001/api';
 };
 
